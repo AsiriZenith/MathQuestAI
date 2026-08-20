@@ -112,6 +112,10 @@ Subject 1 ──────── * Topic
 
 Subject selection is required in the application.
 
+### Physical schema note (discovered during TASK-004 introspection)
+
+The actual `subjects` table also has a `language` column (`VARCHAR(50)`, e.g. `"English"`), with a unique constraint on `(name, language)`. This was not previously documented here. The database is the source of truth for the physical schema (per §29), so this is recorded here rather than treated as an error — currently seeded data uses a single language, and no application requirement depends on it yet.
+
 ---
 
 # 6. Topic
