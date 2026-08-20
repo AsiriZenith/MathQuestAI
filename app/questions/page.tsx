@@ -14,15 +14,17 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default function QuestionsPage() {
   const router = useRouter();
-  const { config, questions } = usePracticeSession();
+  const { config, generationResponse } = usePracticeSession();
 
   useEffect(() => {
-    if (!config || !questions) {
+    if (!config || !generationResponse) {
       router.replace("/");
     }
-  }, [config, questions, router]);
+  }, [config, generationResponse, router]);
 
-  if (!config || !questions) return null;
+  if (!config || !generationResponse) return null;
+
+  const questions = generationResponse.questions;
 
   const difficultyLabel = cap(config.difficulty);
   const difficultyStyle =
@@ -66,12 +68,12 @@ export default function QuestionsPage() {
 
       <SelectionSummary grade={config.grade} items={summaryItems} />
 
-      <QuestionCoverage totalTypes={questions.length} />
+      <QuestionCoverage questions={questions} />
 
       <div className="space-y-4">
         {questions.map((q, i) => (
           <QuestionCard
-            key={q.id}
+            key={q.questionNumber}
             question={q}
             index={i}
             difficultyLabel={difficultyLabel}

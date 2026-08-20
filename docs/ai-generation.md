@@ -1178,3 +1178,23 @@ Better generated questions
 ```
 
 The project should therefore optimize for **experimentability, clarity, and evaluation**, not unnecessary architectural complexity.
+
+---
+
+# 44. Implemented Prompt Structure (TASK-006)
+
+TASK-006 implemented the deterministic Prompt Builder and AI output contract described conceptually above. This section records what was actually built, in `lib/prompts/`:
+
+```text
+lib/prompts/
+├── types.ts     — AiQuestionType, GeneratedQuestion, GenerationResponse, PromptRequest
+├── common.ts    — COMMON_INSTRUCTIONS, DIFFICULTY_GUIDANCE, QUESTION_TYPE_ID_MAP, OUTPUT_FORMAT_INSTRUCTIONS
+├── builder.ts   — buildPrompt(request: PromptRequest): string
+└── schema.ts    — parseGenerationResponse(raw: string): ParsedGenerationResponse
+```
+
+`buildPrompt` takes an already-loaded `GenerationContext` (from `lib/db/generation-context.ts`, TASK-005) plus the requested question type(s) and count, and deterministically assembles 7 sections: Common Instructions, Generation Requirement (count), Educational Context (Subject/Subtopic/Question Patterns + per-pattern generation guidance), Difficulty (with the project-specific guidance text), Question Type (explicit list, or all available types when the user chose "let AI mix"), Reference Questions, and Output Format (the required JSON contract, verbatim).
+
+The expected AI response is validated with a small `zod` schema (`lib/prompts/schema.ts`) — a `multiple_choice` question requires a non-empty `options` array and a `correctAnswer` matching one of the option ids; other question types only require `correctAnswer` as plain text. `parseGenerationResponse` never throws — malformed JSON or a schema violation both return `{ ok: false, error }`.
+
+**No AI provider is called by this module.** A dev-only inspection route, `app/dev/prompt-preview`, lets a researcher see the exact final prompt string that would be sent, built from live database context — satisfying the "prompt must be inspectable" research-loop requirement without wiring a live AI call.

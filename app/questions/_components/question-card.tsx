@@ -1,10 +1,8 @@
 import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
-import { QUESTION_TYPE_META } from "@/lib/mock-data";
+import { AI_QUESTION_TYPE_META } from "@/components/common/ai-question-type-meta";
 import { TypeBadge } from "@/components/common/type-badge";
-import type { GeneratedQuestion } from "@/lib/types";
-
-const OPTION_LETTERS = ["A", "B", "C", "D"];
+import type { GeneratedQuestion } from "@/lib/prompts/types";
 
 export function QuestionCard({
   question,
@@ -17,7 +15,7 @@ export function QuestionCard({
   difficultyLabel: string;
   difficultyStyle: string;
 }) {
-  const meta = QUESTION_TYPE_META[question.typeId];
+  const meta = AI_QUESTION_TYPE_META[question.questionType];
 
   return (
     <motion.div
@@ -28,7 +26,7 @@ export function QuestionCard({
     >
       <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
         <span className="font-jakarta text-xs font-bold uppercase tracking-wider text-muted-foreground">
-          Question {index + 1}
+          Question {question.questionNumber}
         </span>
         <span
           className={`font-jakarta text-[0.65rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border-2 ${difficultyStyle}`}
@@ -42,14 +40,14 @@ export function QuestionCard({
       </div>
 
       <p className="whitespace-pre-line text-[0.98rem] font-medium text-foreground leading-relaxed">
-        {question.prompt}
+        {question.questionText}
       </p>
 
       {question.options && (
         <ol className="mt-3 space-y-1.5">
-          {question.options.map((opt, idx) => (
-            <li key={opt} className="text-sm text-foreground/80">
-              <span className="font-semibold text-foreground">{OPTION_LETTERS[idx]}.</span> {opt}
+          {question.options.map((opt) => (
+            <li key={opt.id} className="text-sm text-foreground/80">
+              <span className="font-semibold text-foreground">{opt.id}.</span> {opt.text}
             </li>
           ))}
         </ol>

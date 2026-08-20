@@ -742,7 +742,33 @@ Use the project's environment configuration conventions and ensure local environ
 
 ---
 
-## 25. High-Level Repository Structure
+## 25. Local AI Configuration
+
+MathQuestAI uses Google Gemini for AI-powered question generation.
+
+### 1. Get a Gemini API key
+
+Create an API key using Google AI Studio:
+
+https://aistudio.google.com/
+
+### 2. Configure the local environment
+
+Create `.env.local` in the project root and add:
+
+```env
+MATHQUESTAI_GEMINI_API_KEY_V1=your-api-key-here
+```
+
+Never commit `.env.local` or expose the API key publicly.
+
+### 3. Run the application
+
+Start MathQuestAI using the normal development command (`npm run dev`).
+
+---
+
+## 26. High-Level Repository Structure
 
 The project is expected to evolve toward:
 
@@ -776,7 +802,7 @@ The actual implementation may evolve as the project develops.
 
 ---
 
-## 26. Definition of Success
+## 27. Definition of Success
 
 The project is successful if it can demonstrate a repeatable process where:
 
@@ -802,7 +828,7 @@ The goal is:
 
 ---
 
-## 27. Documentation Entry Points
+## 28. Documentation Entry Points
 
 When working on the project, start with:
 

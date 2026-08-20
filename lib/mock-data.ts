@@ -9,19 +9,12 @@ import type {
   CoverageResult,
   Difficulty,
   Finding,
-  GeneratedQuestion,
   GeneratedTypeId,
   LoadingStep,
   PatternStatus,
   QuestionPatternCoverage,
-  QuestionTypeMeta,
   RequestedTypeId,
 } from "@/lib/types";
-
-// The only Subtopic currently documented/seeded for the Algebra topic
-// (docs/database.md §7/§26). The reference UI used three fictional
-// subtopic names; aligned here to the real seeded data.
-export const SUBTOPICS = ["Simplify / Calculate"];
 
 export const QUESTION_TYPE_OPTIONS = [
   { id: "mc", label: "Multiple Choice" },
@@ -62,73 +55,6 @@ export const LOADING_STEPS: LoadingStep[] = [
   { id: 2, label: "Identifying question types", Icon: LayoutList },
   { id: 3, label: "Creating questions", Icon: PenLine },
   { id: 4, label: "Checking question variety", Icon: CheckCircle2 },
-];
-
-export const QUESTION_TYPE_META: Record<GeneratedTypeId, QuestionTypeMeta> = {
-  direct: {
-    label: "Direct Equation",
-    dotClass: "bg-indigo-500",
-    badgeClass: "bg-indigo-50 border-indigo-200/60 text-indigo-700",
-  },
-  mc: {
-    label: "Multiple Choice",
-    dotClass: "bg-violet-500",
-    badgeClass: "bg-violet-50 border-violet-200/60 text-violet-700",
-  },
-  word: {
-    label: "Word Problem",
-    dotClass: "bg-amber-500",
-    badgeClass: "bg-amber-50 border-amber-200/60 text-amber-700",
-  },
-  missing: {
-    label: "Missing Value",
-    dotClass: "bg-rose-500",
-    badgeClass: "bg-rose-50 border-rose-200/60 text-rose-700",
-  },
-  multistep: {
-    label: "Multi-step Problem",
-    dotClass: "bg-emerald-500",
-    badgeClass: "bg-emerald-50 border-emerald-200/60 text-emerald-700",
-  },
-};
-
-export const GENERATED_TYPE_ORDER: GeneratedTypeId[] = [
-  "direct",
-  "mc",
-  "word",
-  "missing",
-  "multistep",
-];
-
-export const SAMPLE_QUESTIONS: GeneratedQuestion[] = [
-  {
-    id: 1,
-    typeId: "direct",
-    prompt: "Solve for x:\n3x + 7 = 22",
-  },
-  {
-    id: 2,
-    typeId: "mc",
-    prompt: "If 2x + 5 = 15, what is the value of x?",
-    options: ["3", "5", "7", "10"],
-  },
-  {
-    id: 3,
-    typeId: "word",
-    prompt:
-      "A school trip costs a fixed booking fee of $40, plus $5 for every student who attends. If the total cost came to $115, how many students went on the trip?",
-  },
-  {
-    id: 4,
-    typeId: "missing",
-    prompt: "Find the missing value:\n5x + \u25A2 = 32, when x = 5",
-  },
-  {
-    id: 5,
-    typeId: "multistep",
-    prompt:
-      "A rectangle's perimeter is 54 cm. Its length is 3 cm more than twice its width. Find the width and length of the rectangle.",
-  },
 ];
 
 export const COVERAGE_RESULT: CoverageResult = {

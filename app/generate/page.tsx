@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -13,8 +13,12 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
+import Link from "next/link";
 import { motion } from "motion/react";
-import { LOADING_STEPS, QUESTION_TYPE_OPTIONS, SAMPLE_QUESTIONS } from "@/lib/mock-data";
+import { LOADING_STEPS, QUESTION_TYPE_OPTIONS } from "@/lib/mock-data";
+import { QUESTION_TYPE_ID_MAP } from "@/lib/prompts/common";
+import { generateQuestionsAction } from "@/lib/actions/generation";
+import type { AiQuestionType, GenerationResponse } from "@/lib/prompts/types";
 import { usePracticeSession } from "@/components/providers/practice-session-provider";
 import { SessionSummaryCard } from "./_components/session-summary-card";
 import type { SummaryItem } from "@/lib/types";
@@ -23,23 +27,51 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default function GeneratePage() {
   const router = useRouter();
-  const { config, setQuestions } = usePracticeSession();
+  const { config, generationContext, setGenerationResponse } = usePracticeSession();
   const [currentStep, setCurrentStep] = useState(1);
-  const isDone = currentStep > 4;
+  const animationDone = currentStep > 4;
+
+  const [result, setResult] = useState<
+    { ok: true; data: GenerationResponse } | { ok: false; error: string } | null
+  >(null);
+  const requestedRef = useRef(false);
 
   useEffect(() => {
-    if (!config) {
+    if (!config || !generationContext) {
       router.replace("/");
     }
-  }, [config, router]);
+  }, [config, generationContext, router]);
 
   useEffect(() => {
-    if (!config || isDone) return;
+    if (!config || animationDone) return;
     const t = setTimeout(() => setCurrentStep((s) => s + 1), 2200);
     return () => clearTimeout(t);
-  }, [config, currentStep, isDone]);
+  }, [config, currentStep, animationDone]);
 
-  if (!config) return null;
+  useEffect(() => {
+    if (!config || !generationContext || requestedRef.current) return;
+    requestedRef.current = true;
+
+    const questionTypes: AiQuestionType[] | "auto" = config.autoTypes
+      ? "auto"
+      : config.selectedTypes
+          .map((id) => QUESTION_TYPE_ID_MAP[id]?.id)
+          .filter((id): id is AiQuestionType => Boolean(id));
+
+    generateQuestionsAction(generationContext, questionTypes).then((res) => {
+      if (res.ok) {
+        setResult({ ok: true, data: res.data });
+      } else {
+        setResult({ ok: false, error: res.error });
+      }
+    });
+  }, [config, generationContext]);
+
+  if (!config || !generationContext) return null;
+
+  const resultReady = result !== null;
+  const failed = result !== null && !result.ok;
+  const isDone = animationDone && resultReady && !failed;
 
   const difficultyLabel = cap(config.difficulty);
   const typesLabel = config.autoTypes
@@ -67,9 +99,36 @@ export default function GeneratePage() {
   ];
 
   const handleComplete = () => {
-    setQuestions(SAMPLE_QUESTIONS);
+    if (!result || !result.ok) return;
+    setGenerationResponse(result.data);
     router.push("/questions");
   };
+
+  if (failed) {
+    return (
+      <main className="relative z-10 max-w-3xl mx-auto px-6 pb-24">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="max-w-md"
+        >
+          <h1 className="font-jakarta text-3xl font-extrabold tracking-tight text-foreground mb-2">
+            Generation Failed
+          </h1>
+          <p className="text-[0.95rem] text-muted-foreground leading-relaxed mb-6">
+            {result && !result.ok ? result.error : "Something went wrong."}
+          </p>
+          <Link
+            href="/"
+            className="font-jakarta inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold text-sm px-6 py-3 rounded-xl shadow-sm hover:bg-accent transition-colors duration-150"
+          >
+            Back to Setup
+          </Link>
+        </motion.div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative z-10 max-w-3xl mx-auto px-6 pb-24">

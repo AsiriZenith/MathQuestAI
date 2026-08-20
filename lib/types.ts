@@ -5,10 +5,57 @@ export type Difficulty = "easy" | "medium" | "hard";
 export interface PracticeConfig {
   grade: string;
   subtopic: string;
+  subtopicId: string;
   difficulty: Difficulty;
   selectedTypes: string[];
   autoTypes: boolean;
 }
+
+export interface SubjectRecord {
+  id: string;
+  name: string;
+}
+
+export interface TopicRecord {
+  id: string;
+  name: string;
+}
+
+export interface SubtopicRecord {
+  id: string;
+  name: string;
+}
+
+export interface SubjectWithSubtopics {
+  subject: SubjectRecord;
+  topic: TopicRecord;
+  subtopics: SubtopicRecord[];
+}
+
+export interface GenerationContextReferenceQuestion {
+  id: string;
+  questionText: string;
+  expectedAnswer: string;
+  explanation: string | null;
+}
+
+export interface GenerationContextPattern {
+  id: string;
+  name: string;
+  generationPrompt: string | null;
+  referenceQuestions: GenerationContextReferenceQuestion[];
+}
+
+export interface GenerationContext {
+  subjectName: string;
+  subtopicName: string;
+  difficulty: Difficulty;
+  patterns: GenerationContextPattern[];
+}
+
+export type GenerationContextResult =
+  | { ok: true; context: GenerationContext }
+  | { ok: false; error: string };
 
 export type GeneratedTypeId = "direct" | "mc" | "word" | "missing" | "multistep";
 
@@ -16,13 +63,6 @@ export interface QuestionTypeMeta {
   label: string;
   dotClass: string;
   badgeClass: string;
-}
-
-export interface GeneratedQuestion {
-  id: number;
-  typeId: GeneratedTypeId;
-  prompt: string;
-  options?: string[];
 }
 
 export type CoverageLevel = "good" | "partial" | "limited";

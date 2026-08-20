@@ -1,18 +1,44 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import SetupPage from "@/app/page";
+import { SetupForm } from "@/app/_components/setup-form";
 import { renderWithSession } from "../test-utils";
+import type { GenerationContext } from "@/lib/types";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace: vi.fn() }),
 }));
 
+const loadGenerationContextAction = vi.fn();
+vi.mock("@/lib/actions/setup", () => ({
+  loadGenerationContextAction: (...args: unknown[]) => loadGenerationContextAction(...args),
+}));
+
+const SUBJECT = { id: "subject-1", name: "Mathematics" };
+const TOPIC = { id: "topic-1", name: "Algebra" };
+const SUBTOPICS = [{ id: "subtopic-1", name: "Simplify / Calculate" }];
+
+const SAMPLE_CONTEXT: GenerationContext = {
+  subjectName: "Mathematics",
+  subtopicName: "Simplify / Calculate",
+  difficulty: "easy",
+  patterns: [],
+};
+
+function renderSetupForm() {
+  return renderWithSession(<SetupForm subject={SUBJECT} topic={TOPIC} subtopics={SUBTOPICS} />);
+}
+
 describe("Setup form", () => {
+  beforeEach(() => {
+    push.mockClear();
+    loadGenerationContextAction.mockReset();
+  });
+
   it("disables Generate Questions until all required fields are filled", async () => {
     const user = userEvent.setup();
-    renderWithSession(<SetupPage />);
+    renderSetupForm();
 
     const generateButton = screen.getByRole("button", { name: /generate questions/i });
     expect(generateButton).toBeDisabled();
@@ -29,7 +55,7 @@ describe("Setup form", () => {
 
   it("toggling a selected difficulty button again deselects it", async () => {
     const user = userEvent.setup();
-    renderWithSession(<SetupPage />);
+    renderSetupForm();
 
     const easyButton = screen.getByRole("button", { name: "Easy" });
     await user.click(easyButton);
@@ -41,7 +67,7 @@ describe("Setup form", () => {
 
   it("toggling a question type chip reflects its selected state", async () => {
     const user = userEvent.setup();
-    renderWithSession(<SetupPage />);
+    renderSetupForm();
 
     const mcButton = screen.getByRole("button", { name: "Multiple Choice" });
     expect(mcButton.className).not.toMatch(/bg-primary\b/);
@@ -50,15 +76,40 @@ describe("Setup form", () => {
     expect(mcButton.className).toMatch(/bg-primary\b/);
   });
 
-  it("navigates to /generate on submit once the form is valid", async () => {
+  it("loads the generation context and navigates to /generate on successful submit", async () => {
+    loadGenerationContextAction.mockResolvedValue({ ok: true, context: SAMPLE_CONTEXT });
     const user = userEvent.setup();
-    renderWithSession(<SetupPage />);
+    renderSetupForm();
 
     await user.selectOptions(screen.getByLabelText(/subtopic/i), "Simplify / Calculate");
     await user.click(screen.getByRole("button", { name: "Easy" }));
     await user.click(screen.getByRole("button", { name: "Multiple Choice" }));
     await user.click(screen.getByRole("button", { name: /generate questions/i }));
 
+    expect(await screen.findByText(/generate questions/i)).toBeInTheDocument();
     expect(push).toHaveBeenCalledWith("/generate");
+    expect(loadGenerationContextAction).toHaveBeenCalledWith({
+      subjectName: "Mathematics",
+      subtopicId: "subtopic-1",
+      subtopicName: "Simplify / Calculate",
+      difficulty: "easy",
+    });
+  });
+
+  it("shows an inline error and does not navigate when the context fails to load", async () => {
+    loadGenerationContextAction.mockResolvedValue({
+      ok: false,
+      error: "Unable to load question data.",
+    });
+    const user = userEvent.setup();
+    renderSetupForm();
+
+    await user.selectOptions(screen.getByLabelText(/subtopic/i), "Simplify / Calculate");
+    await user.click(screen.getByRole("button", { name: "Easy" }));
+    await user.click(screen.getByRole("button", { name: "Multiple Choice" }));
+    await user.click(screen.getByRole("button", { name: /generate questions/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Unable to load question data.");
+    expect(push).not.toHaveBeenCalled();
   });
 });
