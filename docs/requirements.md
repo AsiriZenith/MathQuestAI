@@ -112,6 +112,8 @@ Simplify / Calculate
 
 # 6. Question Pattern
 
+> **Implementation note (TASK-002):** The UI recreated in TASK-002 from the reference design does **not** present Question Pattern as a user-selectable field in the Setup screen. It is resolved internally during generation based on Subject/Topic/Subtopic/Difficulty/Question Type. This was a deliberate decision to match the reference UI exactly rather than add UI not present in the design (see `docs/ui.md` §5). The requirement below describes the originally intended long-term behavior; it does not currently reflect the implemented UI.
+
 ## Requirement
 
 After selecting a Subtopic, the system must load the Question Patterns belonging to that Subtopic.

@@ -213,6 +213,8 @@ The database design is documented separately in:
 
 ## 9. Question Patterns
 
+> **Implementation note (TASK-002):** Question Pattern is not exposed as a user-selectable field in the recreated UI's Setup screen — it's resolved internally during generation. See `docs/requirements.md` §6 and `docs/ui.md` §5.
+
 Question Patterns represent specific types of mathematical tasks within a Subtopic.
 
 For example, under Algebra we have worked with patterns such as:

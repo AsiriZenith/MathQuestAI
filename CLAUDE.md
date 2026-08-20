@@ -198,7 +198,7 @@ If something is unclear and the decision affects architecture, data structure, r
 
 An existing React project generated from the Figma design is available at:
 
-`D:\my works\MathQuestAI\`
+`D:\my works\MathQuestAI_UI\`
 
 This project is a READ-ONLY reference project.
 
@@ -206,11 +206,11 @@ It contains the UI pages and design that should be reproduced in the actual Next
 
 ### Important rules
 
-- Do NOT modify the project at `D:\my works\MathQuestAI\`.
+- Do NOT modify the project at `D:\my works\MathQuestAI_UI\`.
 - Inspect it when UI implementation requires it.
 - Reuse its visual structure, page concepts, routes, assets, and design patterns where appropriate.
 - Adapt the implementation to Next.js rather than blindly copying the React project.
-- The actual application is being developed in `D:\my works\ai-bootcamp\`.
+- The actual application is being developed in `D:\my works\MathQuestAI\`.
 
 ---
 
@@ -432,6 +432,8 @@ Complete
  ↓
 Update Progress
  ↓
+Write Agent Feedback Report
+ ↓
 Review README and docs
 ```
 
@@ -468,7 +470,32 @@ Update `docs/progress.md` when a meaningful task is started or completed.
 
 ---
 
-## 18. Testing
+## 18. Agent Feedback Reports
+
+After completing each task, write a Markdown file into:
+
+`agent-feedbacks/`
+
+The file should be named after the task (e.g. `TASK-004-configure-prisma-postgresql.md`), so the developer can read it manually before deciding whether to proceed to the next task.
+
+The report should cover:
+
+- What was actually done (task output/result summary).
+- Any action the developer needs to take before the next task proceeds (approvals, credentials, manual verification, environment setup, etc.).
+- Any risky or judgment-call decisions made during the task, and why.
+- Any deviations from the task's original instructions, and why.
+- Suggestions or concerns for the developer to consider going forward.
+
+This is separate from `docs/progress.md`:
+
+- `docs/progress.md` stays a short, high-level, continuously-updated project state.
+- `agent-feedbacks/<task-name>.md` is a one-time, detailed, per-task record — written once when the task completes and not edited afterward, except to append a follow-up if the developer asks a question about it.
+
+Do not skip this step for meaningful tasks. It may be brief for small or low-risk tasks, but it should still exist.
+
+---
+
+## 19. Testing
 
 Tests are organized under:
 
@@ -498,7 +525,7 @@ Where possible, deterministic tests should not depend on a live AI API call.
 
 ---
 
-## 19. Change Management
+## 20. Change Management
 
 When a change affects:
 
@@ -520,7 +547,7 @@ If an existing decision appears problematic, explain the issue and propose an al
 
 ---
 
-## 20. Current Development Strategy
+## 21. Current Development Strategy
 
 The project will be developed incrementally.
 
@@ -543,7 +570,7 @@ Later stages should only be implemented when the requirements are defined.
 
 ---
 
-## 21. Initial Tasks
+## 22. Initial Tasks
 
 The initial tasks are intentionally limited.
 
@@ -567,7 +594,7 @@ Additional tasks will be created as the project progresses.
 
 ---
 
-## 22. Important Rule
+## 23. Important Rule
 
 When working on MathQuestAI, optimize for:
 
