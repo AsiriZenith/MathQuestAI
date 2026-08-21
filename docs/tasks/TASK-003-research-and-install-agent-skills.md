@@ -70,7 +70,7 @@ Important project documentation includes:
 CLAUDE.md
 README.md
 docs/
-tasks/
+docs/tasks/
 tests/
 ```
 
@@ -109,7 +109,7 @@ MathQuestAI/
 ├── CLAUDE.md
 ├── README.md
 ├── docs/
-├── tasks/
+├── docs/tasks/
 └── tests/
     ├── unit/
     └── integration/
@@ -194,7 +194,7 @@ Before searching for skills:
 1. Read `CLAUDE.md`.
 2. Read `README.md`.
 3. Review relevant files under `docs/`.
-4. Review current task files under `tasks/`.
+4. Review current task files under `docs/tasks/`.
 5. Review current test specifications/files under `tests/`.
 6. Inspect `package.json`.
 7. Inspect Next.js configuration.
@@ -307,7 +307,7 @@ Skills should complement:
 ```text
 CLAUDE.md
 docs/
-tasks/
+docs/tasks/
 tests/
 ```
 

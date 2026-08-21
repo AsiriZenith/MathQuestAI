@@ -25,7 +25,7 @@ Already created manually before application development.
 The database schema is documented in:
 
 ```text
-docs/database.md
+docs/project-management/database.md
 ```
 
 ---
@@ -83,15 +83,15 @@ Before implementation, read:
 ```text
 CLAUDE.md
 
-docs/project.md
-docs/product.md
-docs/requirements.md
-docs/architecture.md
-docs/database.md
-docs/ai-generation.md
+docs/project-management/project.md
+docs/project-management/product.md
+docs/project-management/requirements.md
+docs/project-management/architecture.md
+docs/project-management/database.md
+docs/project-management/ai-generation.md
 
-tasks/README.md
-tasks/backlog/TASK-003-configure-prisma-postgresql.md
+docs/tasks/README.md
+docs/tasks/backlog/TASK-003-configure-prisma-postgresql.md
 ```
 
 The database documentation must be compared against the actual PostgreSQL database before making assumptions.
@@ -130,7 +130,7 @@ Before defining Prisma models, inspect the actual PostgreSQL schema.
 Confirm the relevant tables and relationships documented in:
 
 ```text
-docs/database.md
+docs/project-management/database.md
 ```
 
 The initial educational data model includes the concepts established during the database design:
@@ -153,7 +153,7 @@ Use the actual table names, columns, primary keys, foreign keys, and data types 
 
 Do not invent fields based only on conceptual names.
 
-If the actual database differs from `docs/database.md`, stop and report the difference rather than silently modifying the database.
+If the actual database differs from `docs/project-management/database.md`, stop and report the difference rather than silently modifying the database.
 
 ---
 
@@ -268,7 +268,7 @@ Avoid creating a new Prisma Client instance on every hot reload if that would ca
 The exact implementation should follow the project's architecture documented in:
 
 ```text
-docs/architecture.md
+docs/project-management/architecture.md
 ```
 
 Do not introduce a large repository abstraction solely for this task.
@@ -429,7 +429,7 @@ Resolve errors caused by this task.
 This task is complete when:
 
 - [ ] The existing PostgreSQL database has been inspected.
-- [ ] The actual schema has been compared with `docs/database.md`.
+- [ ] The actual schema has been compared with `docs/project-management/database.md`.
 - [ ] Prisma is correctly configured for PostgreSQL.
 - [ ] Prisma Client is generated successfully.
 - [ ] The database connection uses environment configuration.
@@ -534,7 +534,7 @@ For this research project, a simple and understandable database access layer is 
 If the actual database differs from:
 
 ```text
-docs/database.md
+docs/project-management/database.md
 ```
 
 do not silently modify the database to match the documentation.
@@ -548,7 +548,7 @@ Instead:
 Important database decisions discovered during implementation should be recorded in:
 
 ```text
-docs/database.md
+docs/project-management/database.md
 ```
 
 or another appropriate documentation file.
@@ -597,7 +597,7 @@ When the task is complete, report:
 
 - Tables inspected
 - Important relationships confirmed
-- Any discrepancy with `docs/database.md`
+- Any discrepancy with `docs/project-management/database.md`
 
 ### Prisma
 

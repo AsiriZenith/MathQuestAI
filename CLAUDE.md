@@ -127,15 +127,15 @@ Before implementing a feature, read the relevant documentation.
 
 ### Documentation
 
-- `docs/project.md` — overall project context and current project state
-- `docs/product.md` — product definition and goals
-- `docs/requirements.md` — functional requirements and user flows
-- `docs/architecture.md` — technical architecture
-- `docs/database.md` — database structure and relationships
-- `docs/ai-generation.md` — AI generation, context and prompt strategy
-- `docs/ui.md` — UI pages, routes and design decisions
+- `docs/project-management/project.md` — overall project context and current project state
+- `docs/project-management/product.md` — product definition and goals
+- `docs/project-management/requirements.md` — functional requirements and user flows
+- `docs/project-management/architecture.md` — technical architecture
+- `docs/project-management/database.md` — database structure and relationships
+- `docs/project-management/ai-generation.md` — AI generation, context and prompt strategy
+- `docs/project-management/ui.md` — UI pages, routes and design decisions
 - `docs/development.md` — development workflow and TDD practices
-- `docs/progress.md` — current project progress and completed/in-progress work
+- `docs/project-management/progress.md` — current project progress and completed/in-progress work
 
 If documentation conflicts with assumptions in the code, stop and identify the conflict rather than silently choosing an implementation.
 
@@ -232,7 +232,7 @@ The database contains concepts such as:
 
 The detailed schema and relationships are documented in:
 
-`docs/database.md`
+`docs/project-management/database.md`
 
 Do not redesign existing database relationships without first reviewing the documented design and identifying the reason for the change.
 
@@ -298,7 +298,7 @@ The objective is to determine which context produces better and more consistent 
 
 Detailed decisions belong in:
 
-`docs/ai-generation.md`
+`docs/project-management/ai-generation.md`
 
 ---
 
@@ -400,7 +400,7 @@ Avoid implementing future requirements prematurely.
 
 Development work should be organized into small tasks under:
 
-`tasks/`
+`docs/tasks/`
 
 Tasks will be created progressively as the project evolves.
 
@@ -443,7 +443,7 @@ Review README and docs
 
 Current project progress is maintained in:
 
-`docs/progress.md`
+`docs/project-management/progress.md`
 
 This file should provide a high-level view of:
 
@@ -454,7 +454,7 @@ This file should provide a high-level view of:
 - Blockers
 - Research iterations
 
-Individual task details remain in `tasks/`.
+Individual task details remain in `docs/tasks/`.
 
 The progress document should answer:
 
@@ -464,9 +464,9 @@ The task files should answer:
 
 > "What exactly are we doing?"
 
-Do not duplicate detailed task content inside `docs/progress.md`.
+Do not duplicate detailed task content inside `docs/project-management/progress.md`.
 
-Update `docs/progress.md` when a meaningful task is started or completed.
+Update `docs/project-management/progress.md` when a meaningful task is started or completed.
 
 ---
 
@@ -474,7 +474,7 @@ Update `docs/progress.md` when a meaningful task is started or completed.
 
 After completing each task, write a Markdown file into:
 
-`agent-feedbacks/`
+`docs/agent-feedbacks/`
 
 The file should be named after the task (e.g. `TASK-004-configure-prisma-postgresql.md`), so the developer can read it manually before deciding whether to proceed to the next task.
 
@@ -486,10 +486,10 @@ The report should cover:
 - Any deviations from the task's original instructions, and why.
 - Suggestions or concerns for the developer to consider going forward.
 
-This is separate from `docs/progress.md`:
+This is separate from `docs/project-management/progress.md`:
 
-- `docs/progress.md` stays a short, high-level, continuously-updated project state.
-- `agent-feedbacks/<task-name>.md` is a one-time, detailed, per-task record — written once when the task completes and not edited afterward, except to append a follow-up if the developer asks a question about it.
+- `docs/project-management/progress.md` stays a short, high-level, continuously-updated project state.
+- `docs/agent-feedbacks/<task-name>.md` is a one-time, detailed, per-task record — written once when the task completes and not edited afterward, except to append a follow-up if the developer asks a question about it.
 
 Do not skip this step for meaningful tasks. It may be brief for small or low-risk tasks, but it should still exist.
 

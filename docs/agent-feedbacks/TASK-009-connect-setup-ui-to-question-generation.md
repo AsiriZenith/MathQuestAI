@@ -7,7 +7,7 @@
 ## Files created/modified
 
 - New: `lib/actions/generation.ts` (Server Action), `components/common/ai-question-type-meta.ts`, `tests/unit/generate-questions-action.test.ts`, `tests/integration/generate-screen.test.tsx`.
-- Modified: `components/providers/practice-session-provider.tsx`, `tests/test-utils.tsx`, `app/generate/page.tsx`, `app/questions/page.tsx`, `app/questions/_components/question-card.tsx`, `app/questions/_components/question-coverage.tsx`, `lib/mock-data.ts`, `lib/types.ts`, `tests/integration/questions-screen.test.tsx`, `tests/integration/navigation-flow.test.tsx`, `docs/progress.md`.
+- Modified: `components/providers/practice-session-provider.tsx`, `tests/test-utils.tsx`, `app/generate/page.tsx`, `app/questions/page.tsx`, `app/questions/_components/question-card.tsx`, `app/questions/_components/question-coverage.tsx`, `lib/mock-data.ts`, `lib/types.ts`, `tests/integration/questions-screen.test.tsx`, `tests/integration/navigation-flow.test.tsx`, `docs/project-management/progress.md`.
 - Nothing else — no Evaluation page work, no schema changes, no new dependencies.
 
 ## Design, exactly as planned

@@ -7,7 +7,7 @@
 ## Files created/modified
 
 - New: `lib/generation/generate-questions.ts` (the use case), `tests/unit/generate-questions.test.ts` (6 tests), `app/dev/generate-questions-check/page.tsx` (real verification route).
-- Modified: `docs/progress.md`.
+- Modified: `docs/project-management/progress.md`.
 - Nothing else — no Setup/Generate/Questions/Evaluation UI files touched, no schema changes, no new dependencies (uses only what TASK-005/006/007 already installed).
 
 ## Use-case design

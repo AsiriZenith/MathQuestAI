@@ -142,7 +142,7 @@ MathQuestAI/
 │
 ├── docs/
 │
-├── tasks/
+├── docs/tasks/
 │
 ├── CLAUDE.md
 └── package.json
@@ -170,7 +170,7 @@ The UI should not contain database-specific logic or AI prompt construction logi
 
 # 7. Generation Flow
 
-> **Implementation note (TASK-002):** The recreated UI does not include a "Select Question Pattern(s)" step — Question Pattern is resolved internally rather than user-selected. See `docs/requirements.md` §6 and `docs/ui.md` §5.
+> **Implementation note (TASK-002):** The recreated UI does not include a "Select Question Pattern(s)" step — Question Pattern is resolved internally rather than user-selected. See `docs/project-management/requirements.md` §6 and `docs/project-management/ui.md` §5.
 
 The generation flow is:
 
@@ -256,7 +256,7 @@ Difficulty
 
 The detailed schema is documented separately in:
 
-`docs/database.md`
+`docs/project-management/database.md`
 
 The application should use Prisma for database access.
 
@@ -284,7 +284,7 @@ Database access should remain server-side.
 
 # 10. Dynamic Data Loading
 
-> **Implementation note (TASK-002):** "Question Patterns for Subtopic" below is not a UI-facing load in the current implementation, since Question Pattern is not user-selected. See `docs/requirements.md` §6.
+> **Implementation note (TASK-002):** "Question Patterns for Subtopic" below is not a UI-facing load in the current implementation, since Question Pattern is not user-selected. See `docs/project-management/requirements.md` §6.
 
 Educational values should be loaded dynamically.
 
@@ -314,7 +314,7 @@ The UI should not hard-code these values.
 
 # 11. Cascading Selection
 
-> **Implementation note (TASK-002):** The current UI's selection chain ends at Subtopic; Question Pattern is not a separate UI selection step. See `docs/requirements.md` §6.
+> **Implementation note (TASK-002):** The current UI's selection chain ends at Subtopic; Question Pattern is not a separate UI selection step. See `docs/project-management/requirements.md` §6.
 
 The selection chain is:
 
@@ -642,7 +642,7 @@ The project should maintain task information inside the repository so that Claud
 A proposed structure is:
 
 ```text
-tasks/
+docs/tasks/
 ├── backlog/
 ├── active/
 ├── completed/

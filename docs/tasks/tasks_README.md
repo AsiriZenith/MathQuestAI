@@ -41,7 +41,7 @@ Tasks that have been implemented, tested, reviewed, and accepted.
 ## 3. Directory Structure
 
 ```text
-tasks/
+docs/tasks/
 ├── README.md
 ├── backlog/
 ├── active/
@@ -53,7 +53,7 @@ Task files should be Markdown files.
 Example:
 
 ```text
-tasks/
+docs/tasks/
 ├── backlog/
 │   ├── TASK-001-initialize-nextjs.md
 │   └── TASK-002-recreate-figma-ui.md
@@ -285,17 +285,17 @@ For AI-generation tasks, evaluation should include the actual generated result r
 When starting a task:
 
 ```text
-tasks/backlog/
+docs/tasks/backlog/
       ↓
-tasks/active/
+docs/tasks/active/
 ```
 
 When completing a task:
 
 ```text
-tasks/active/
+docs/tasks/active/
       ↓
-tasks/completed/
+docs/tasks/completed/
 ```
 
 The task file should move with the task.
@@ -407,16 +407,16 @@ Examples:
 
 ```text
 Architecture decision changes
-    → docs/architecture.md
+    → docs/project-management/architecture.md
 
 Database changes
-    → docs/database.md
+    → docs/project-management/database.md
 
 AI-generation strategy changes
-    → docs/ai-generation.md
+    → docs/project-management/ai-generation.md
 
 Product behavior changes
-    → docs/product.md
+    → docs/project-management/product.md
 ```
 
 The task should mention the documentation update.

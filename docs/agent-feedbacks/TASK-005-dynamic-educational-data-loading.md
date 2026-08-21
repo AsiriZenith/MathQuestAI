@@ -93,4 +93,4 @@ AI provider called: NO
 
 ## Documentation Changes
 
-- `docs/progress.md` — updated with this task's summary and 3 new decision notes.
+- `docs/project-management/progress.md` — updated with this task's summary and 3 new decision notes.

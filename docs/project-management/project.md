@@ -207,13 +207,13 @@ The database currently contains concepts such as:
 
 The database design is documented separately in:
 
-`docs/database.md`
+`docs/project-management/database.md`
 
 ---
 
 ## 9. Question Patterns
 
-> **Implementation note (TASK-002):** Question Pattern is not exposed as a user-selectable field in the recreated UI's Setup screen — it's resolved internally during generation. See `docs/requirements.md` §6 and `docs/ui.md` §5.
+> **Implementation note (TASK-002):** Question Pattern is not exposed as a user-selectable field in the recreated UI's Setup screen — it's resolved internally during generation. See `docs/project-management/requirements.md` §6 and `docs/project-management/ui.md` §5.
 
 Question Patterns represent specific types of mathematical tasks within a Subtopic.
 
@@ -411,7 +411,7 @@ The database includes reference questions and difficulty-specific question-gener
 
 The detailed schema, relationships, and current seed data are documented in:
 
-`docs/database.md`
+`docs/project-management/database.md`
 
 ---
 

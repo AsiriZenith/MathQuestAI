@@ -168,5 +168,5 @@ None of substance. The builder's `questionTypes` input shape (array-or-"auto" in
 
 ## Documentation Changes
 
-- `docs/ai-generation.md` — appended §44 "Implemented Prompt Structure (TASK-006)" documenting what was actually built (not a rewrite of the existing conceptual sections).
-- `docs/progress.md` — updated with this task's summary and the `zod` dependency note.
+- `docs/project-management/ai-generation.md` — appended §44 "Implemented Prompt Structure (TASK-006)" documenting what was actually built (not a rewrite of the existing conceptual sections).
+- `docs/project-management/progress.md` — updated with this task's summary and the `zod` dependency note.

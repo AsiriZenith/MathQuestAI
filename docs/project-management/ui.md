@@ -41,8 +41,8 @@ Fonts: Plus Jakarta Sans and DM Sans, loaded via `next/font/google` (`app/fonts.
 
 ## 5. Known deviations from the reference
 
-- **No Question Pattern selector.** The reference Setup screen has no Question Pattern field — only Subtopic, Difficulty, and Question Type. Per explicit product decision, this was kept as-is rather than adding a selector to match `docs/requirements.md`'s documented (and now superseded, see below) flow. Question Pattern is treated as an internal/content-generation concept, resolved during generation rather than user-selected.
-- **Mock Question Pattern names aligned to real seeded data.** The reference's evaluation mock data used placeholder pattern names ("Direct Equation", "Missing Value", "Multi-step Equation"). These were renamed in `lib/mock-data.ts` to the real seeded Algebra/Simplify-Calculate patterns from `docs/database.md` (Combine Like Terms, Apply Distributive Property, Simplify Multi-Operation Expressions) for more meaningful mock data.
+- **No Question Pattern selector.** The reference Setup screen has no Question Pattern field — only Subtopic, Difficulty, and Question Type. Per explicit product decision, this was kept as-is rather than adding a selector to match `docs/project-management/requirements.md`'s documented (and now superseded, see below) flow. Question Pattern is treated as an internal/content-generation concept, resolved during generation rather than user-selected.
+- **Mock Question Pattern names aligned to real seeded data.** The reference's evaluation mock data used placeholder pattern names ("Direct Equation", "Missing Value", "Multi-step Equation"). These were renamed in `lib/mock-data.ts` to the real seeded Algebra/Simplify-Calculate patterns from `docs/project-management/database.md` (Combine Like Terms, Apply Distributive Property, Simplify Multi-Operation Expressions) for more meaningful mock data.
 - **Mock Subtopic list reduced to the one real seeded value** (`Simplify / Calculate`) instead of the reference's three fictional subtopic names.
 - **`npm run dev` uses `next dev --webpack`, not the Turbopack dev default.** On this development machine, Turbopack's dev-mode PostCSS worker subprocess crashes (`STATUS_DLL_INIT_FAILED`) as soon as `@tailwindcss/postcss` is introduced, while `npm run build` (Turbopack, production) is unaffected. This is an environment-specific workaround, not a design decision — worth re-testing with future Next.js/Turbopack releases.
 
@@ -50,4 +50,4 @@ Fonts: Plus Jakarta Sans and DM Sans, loaded via `next/font/google` (`app/fonts.
 
 ## 6. Testing approach
 
-UI behavior tests live under `tests/unit/` and `tests/integration/` using Vitest + React Testing Library — see `docs/architecture.md` §19/§20 for the general testing philosophy. No e2e framework was introduced for this task; manual visual/navigation validation against the reference (`http://localhost:5173/`) covered that ground instead.
+UI behavior tests live under `tests/unit/` and `tests/integration/` using Vitest + React Testing Library — see `docs/project-management/architecture.md` §19/§20 for the general testing philosophy. No e2e framework was introduced for this task; manual visual/navigation validation against the reference (`http://localhost:5173/`) covered that ground instead.

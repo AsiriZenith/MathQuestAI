@@ -6,7 +6,7 @@ This document defines the functional requirements of MathQuestAI.
 
 It describes what the application should do from a user and system behavior perspective.
 
-It should not contain detailed implementation decisions. Technical implementation belongs in `docs/architecture.md`.
+It should not contain detailed implementation decisions. Technical implementation belongs in `docs/project-management/architecture.md`.
 
 ---
 
@@ -112,7 +112,7 @@ Simplify / Calculate
 
 # 6. Question Pattern
 
-> **Implementation note (TASK-002):** The UI recreated in TASK-002 from the reference design does **not** present Question Pattern as a user-selectable field in the Setup screen. It is resolved internally during generation based on Subject/Topic/Subtopic/Difficulty/Question Type. This was a deliberate decision to match the reference UI exactly rather than add UI not present in the design (see `docs/ui.md` §5). The requirement below describes the originally intended long-term behavior; it does not currently reflect the implemented UI.
+> **Implementation note (TASK-002):** The UI recreated in TASK-002 from the reference design does **not** present Question Pattern as a user-selectable field in the Setup screen. It is resolved internally during generation based on Subject/Topic/Subtopic/Difficulty/Question Type. This was a deliberate decision to match the reference UI exactly rather than add UI not present in the design (see `docs/project-management/ui.md` §5). The requirement below describes the originally intended long-term behavior; it does not currently reflect the implemented UI.
 
 ## Requirement
 
@@ -389,7 +389,7 @@ Final AI Prompt
 
 The exact prompt construction strategy is documented separately in:
 
-`docs/ai-generation.md`
+`docs/project-management/ai-generation.md`
 
 ---
 
@@ -524,7 +524,7 @@ DifficultyLevel
 
 The complete schema is documented in:
 
-`docs/database.md`
+`docs/project-management/database.md`
 
 ---
 

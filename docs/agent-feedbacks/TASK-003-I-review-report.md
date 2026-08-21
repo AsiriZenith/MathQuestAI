@@ -1,7 +1,7 @@
 # TASK-003-I — Re-Review & Additional Agent Skills Research Report
 
 **Date:** 2026-08-20
-**Task:** `tasks/TASK-003-I-re-review-and-install-additional-agent-skills.md`
+**Task:** `docs/tasks/TASK-003-I-re-review-and-install-additional-agent-skills.md`
 
 ---
 
@@ -30,7 +30,7 @@ Re-searched with fresh, more specific queries rather than reusing the prior task
 | `writing-guidelines`, `react-native-guidelines`, `react-view-transitions`, `vercel-optimize`, `vercel-deploy-claimable` (`vercel-labs/agent-skills`) | Various | Vercel (official) | Documentation style rules, mobile patterns, page-transition animation, deployed-project auditing, Vercel deploy tooling | None apply — no mobile app, no view-transitions usage, nothing deployed to Vercel, and `CLAUDE.md`'s own detailed conventions already govern documentation style | N/A | **Not needed** |
 | Community "TypeScript Pro" / "typescript-expert" / similar | TypeScript | Various individuals, unverified | Generic advanced-TypeScript pattern guidance | `strict: true` is already set; no concrete gap identified | No official/vendor option exists; unclear maintenance | **Not needed** |
 | Community Vitest / React Testing Library skills | Testing | Various individuals, unverified | Testing setup/pattern guidance | Existing Vitest + RTL setup already works (21/21 tests passing) | No official Vitest- or Testing-Library-maintained skill exists; a skill can execute shell commands once installed | **Not needed** |
-| Generic AI SDK / prompt-engineering skills | AI application dev | Various, mostly community | Generic LLM/prompt-engineering guidance | AI provider is still undecided (`docs/ai-generation.md`); prompt/context engineering is MathQuestAI's own research subject, already documented in depth | Risk of quietly overriding project-specific research methodology | **Not needed** |
+| Generic AI SDK / prompt-engineering skills | AI application dev | Various, mostly community | Generic LLM/prompt-engineering guidance | AI provider is still undecided (`docs/project-management/ai-generation.md`); prompt/context engineering is MathQuestAI's own research subject, already documented in depth | Risk of quietly overriding project-specific research methodology | **Not needed** |
 
 **Conclusion: no new skills installed.** This reaffirms the prior TASK-003 conclusion, but with materially new evidence — this review inspected Vercel's `agent-skills` repo skill-by-skill (8 individual skills) rather than treating it as one undifferentiated "performance skill," and surfaced two genuinely new OPTIONAL candidates (`composition-patterns`, `web-design-guidelines`) for future reconsideration rather than blanket dismissal.
 
@@ -57,7 +57,7 @@ Existing skills kept:
 See table B above for the full list with reasoning. The most important rejections, restated:
 
 - **Vercel's `react-best-practices`** — the closest thing to a "why not just install it, it's official" temptation, but it directly contradicts a principle the project states explicitly for itself. Installing it would create standing pressure toward premature optimization in a project that has deliberately chosen not to prioritize that yet.
-- **Generic AI/prompt-engineering skills** — the project's own documentation (`docs/ai-generation.md`, `docs/project.md`) already defines a project-specific prompt/context-engineering strategy in more depth and with more domain relevance than any generic external skill could provide; this is the project's actual research subject.
+- **Generic AI/prompt-engineering skills** — the project's own documentation (`docs/project-management/ai-generation.md`, `docs/project-management/project.md`) already defines a project-specific prompt/context-engineering strategy in more depth and with more domain relevance than any generic external skill could provide; this is the project's actual research subject.
 - **Community Vitest/TypeScript skills** — no official/vendor-maintained option exists in either category, and the working test/type setup doesn't have a concrete unmet need that would justify the trust cost of installing arbitrary community instruction files (which can execute shell commands).
 
 ---
@@ -78,7 +78,7 @@ Still sound. Verified directly (not just re-reading the task file):
 - `package.json` — every dependency and devDependency is actually used; no bloat.
 - `tsconfig.json` — `strict: true` intact, `@/*` path alias in place, Next.js TS plugin configured.
 - `next.config.ts` — still a clean stub, no unnecessary configuration.
-- The `npm run dev` → `--webpack` workaround (documented in `docs/progress.md`) remains necessary on this machine; not a code defect, an environment note.
+- The `npm run dev` → `--webpack` workaround (documented in `docs/project-management/progress.md`) remains necessary on this machine; not a code defect, an environment note.
 
 No upgrades recommended — no concrete compatibility, security, correctness, or maintenance reason was found to justify one.
 
@@ -103,17 +103,17 @@ No over-engineering found: no repository pattern, no unnecessary service layers,
 ### Documentation findings
 
 - `docs/development.md` is referenced by `CLAUDE.md` §5 as an expected doc but does not exist. Low severity, not blocking.
-- `CLAUDE.md` §7 still references a stale `D:\my works\ai-bootcamp` path — already tracked in `docs/progress.md`'s "Documentation Follow-up Needed" section from TASK-001; still unresolved, still low severity (doesn't affect actual work, since `docs/project.md`/`docs/architecture.md` are the correct, followed source of truth).
+- `CLAUDE.md` §7 still references a stale `D:\my works\ai-bootcamp` path — already tracked in `docs/project-management/progress.md`'s "Documentation Follow-up Needed" section from TASK-001; still unresolved, still low severity (doesn't affect actual work, since `docs/project-management/project.md`/`docs/project-management/architecture.md` are the correct, followed source of truth).
 
 ### Database-readiness findings
 
-No `prisma/` folder or `schema.prisma` exists yet — TASK-004 hasn't started, as expected. `docs/database.md` remains the schema source of truth and appears internally consistent with what TASK-002's mock data was aligned to (Question Pattern names, Subtopic name). No blockers identified for starting TASK-004.
+No `prisma/` folder or `schema.prisma` exists yet — TASK-004 hasn't started, as expected. `docs/project-management/database.md` remains the schema source of truth and appears internally consistent with what TASK-002's mock data was aligned to (Question Pattern names, Subtopic name). No blockers identified for starting TASK-004.
 
 ---
 
 ## Corrective Task
 
-**TASK-003-II created:** `tasks/TASK-003-II-review-and-restructure-existing-implementation.md`
+**TASK-003-II created:** `docs/tasks/TASK-003-II-review-and-restructure-existing-implementation.md`
 
 Summary of what it covers: extracting the 3 duplicated/inlined pieces from `app/page.tsx` (`FixedField`, `DifficultyToggle`, `QuestionTypeChips`) into `app/_components/`, matching the pattern already used by the other 3 routes, with test-first unit tests for each extracted piece — closing both the structural-consistency finding and the TDD-honesty finding for the piece being touched. Explicitly scoped to exclude everything else found in this review (uncommitted work, doc gaps, the `subtopic` typing note) since none of those require restructuring.
 

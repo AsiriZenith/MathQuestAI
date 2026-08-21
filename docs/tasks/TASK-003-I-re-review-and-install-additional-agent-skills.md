@@ -53,7 +53,7 @@ Claude Code must:
 If the review discovers real problems in the existing project structure or implementation, Claude Code must create:
 
 ```text
-tasks/TASK-003-II-review-and-restructure-existing-implementation.md
+docs/tasks/TASK-003-II-review-and-restructure-existing-implementation.md
 ```
 
 That file will contain the detailed corrective plan.
@@ -176,20 +176,20 @@ docs/
 including, where present:
 
 ```text
-docs/project.md
-docs/product.md
-docs/requirements.md
-docs/architecture.md
-docs/database.md
-docs/ai-generation.md
-docs/ui.md
-docs/progress.md
+docs/project-management/project.md
+docs/project-management/product.md
+docs/project-management/requirements.md
+docs/project-management/architecture.md
+docs/project-management/database.md
+docs/project-management/ai-generation.md
+docs/project-management/ui.md
+docs/project-management/progress.md
 ```
 
 Review:
 
 ```text
-tasks/
+docs/tasks/
 ```
 
 especially:
@@ -730,7 +730,7 @@ Corrective implementation
 If the review identifies real issues that require code/folder/configuration restructuring, create:
 
 ```text
-tasks/TASK-003-II-review-and-restructure-existing-implementation.md
+docs/tasks/TASK-003-II-review-and-restructure-existing-implementation.md
 ```
 
 The file must contain:
@@ -875,7 +875,7 @@ If problems were found:
 
 ```text
 TASK-003-II created:
-tasks/TASK-003-II-review-and-restructure-existing-implementation.md
+docs/tasks/TASK-003-II-review-and-restructure-existing-implementation.md
 ```
 
 Summarize what it will correct.

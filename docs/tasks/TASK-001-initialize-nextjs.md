@@ -58,12 +58,12 @@ Before making changes, Claude Code must read:
 ```text
 CLAUDE.md
 
-docs/project.md
-docs/product.md
-docs/requirements.md
-docs/architecture.md
-docs/database.md
-docs/ai-generation.md
+docs/project-management/project.md
+docs/project-management/product.md
+docs/project-management/requirements.md
+docs/project-management/architecture.md
+docs/project-management/database.md
+docs/project-management/ai-generation.md
 ```
 
 The documentation is the source of project-level decisions.
@@ -170,7 +170,7 @@ ai-bootcamp/
 │
 ├── docs/
 │
-├── tasks/
+├── docs/tasks/
 │
 ├── tests/
 │

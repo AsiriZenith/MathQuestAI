@@ -97,15 +97,15 @@ Before implementation, read:
 ```text
 CLAUDE.md
 
-docs/project.md
-docs/product.md
-docs/requirements.md
-docs/architecture.md
-docs/database.md
-docs/ai-generation.md
+docs/project-management/project.md
+docs/project-management/product.md
+docs/project-management/requirements.md
+docs/project-management/architecture.md
+docs/project-management/database.md
+docs/project-management/ai-generation.md
 
-tasks/README.md
-tasks/backlog/TASK-004-dynamic-educational-data-loading.md
+docs/tasks/README.md
+docs/tasks/backlog/TASK-004-dynamic-educational-data-loading.md
 ```
 
 Also inspect the implementation completed by previous tasks.

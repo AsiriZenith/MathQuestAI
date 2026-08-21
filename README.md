@@ -451,7 +451,7 @@ Important project context is stored in:
 ```text
 CLAUDE.md
 docs/
-tasks/
+docs/tasks/
 ```
 
 The intended workflow is:
@@ -501,7 +501,7 @@ These documents prevent important decisions and project context from existing on
 Tasks are maintained separately:
 
 ```text
-tasks/
+docs/tasks/
 ├── README.md
 ├── backlog/
 ├── in-progress/
@@ -787,7 +787,7 @@ MathQuestAI/
 │
 ├── docs/
 │
-├── tasks/
+├── docs/tasks/
 │   ├── backlog/
 │   ├── in-progress/
 │   └── completed/
@@ -839,18 +839,18 @@ CLAUDE.md
 Then review the relevant documentation:
 
 ```text
-docs/project.md
-docs/product.md
-docs/requirements.md
-docs/architecture.md
-docs/database.md
-docs/ai-generation.md
+docs/project-management/project.md
+docs/project-management/product.md
+docs/project-management/requirements.md
+docs/project-management/architecture.md
+docs/project-management/database.md
+docs/project-management/ai-generation.md
 ```
 
 Then identify the current task under:
 
 ```text
-tasks/
+docs/tasks/
 ```
 
 ---

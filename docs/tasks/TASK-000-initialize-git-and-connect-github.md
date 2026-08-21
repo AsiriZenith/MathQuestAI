@@ -93,7 +93,7 @@ Important files/directories may include:
 CLAUDE.md
 README.md
 docs/
-tasks/
+docs/tasks/
 tests/
 app/
 components/
@@ -334,7 +334,7 @@ Normal TDD expectations continue for subsequent application-development tasks.
 
 After completing this task:
 
-1. Check `docs/progress.md` if it exists.
+1. Check `docs/project-management/progress.md` if it exists.
 2. Record that the local project has been connected to GitHub.
 3. Check `README.md`.
 4. Update `README.md` only if this task introduces meaningful project-level information that belongs in the high-level project overview.
@@ -395,7 +395,7 @@ When finished, report:
 
 ### Documentation
 
-- `docs/progress.md` updated:
+- `docs/project-management/progress.md` updated:
 - `README.md` reviewed:
 - `README.md` updated:
 

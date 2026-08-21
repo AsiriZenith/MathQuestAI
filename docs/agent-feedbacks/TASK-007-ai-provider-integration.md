@@ -112,4 +112,4 @@ Database schema changed: NO
 
 - `README.md` — new §25 "Local AI Configuration" (Gemini API key setup), sections renumbered 25→28 to accommodate it.
 - `.env.example` — added `MATHQUESTAI_GEMINI_API_KEY_V1=` (name only).
-- `docs/progress.md` — updated with this task's summary and 2 new decision notes.
+- `docs/project-management/progress.md` — updated with this task's summary and 2 new decision notes.

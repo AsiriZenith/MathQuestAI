@@ -1,9 +1,9 @@
 # TASK-003 — Agent Skills Research & Installation Report
 
 **Date:** 2026-08-20
-**Task:** `tasks/TASK-003-research-and-install-agent-skills.md`
+**Task:** `docs/tasks/TASK-003-research-and-install-agent-skills.md`
 
-This is a standalone record of what was inspected, researched, decided, and installed for this task, and the resulting impact on the MathQuestAI project. (`docs/progress.md` carries only a one-line pointer to this file, per the project's convention of not duplicating task detail into the progress log.)
+This is a standalone record of what was inspected, researched, decided, and installed for this task, and the resulting impact on the MathQuestAI project. (`docs/project-management/progress.md` carries only a one-line pointer to this file, per the project's convention of not duplicating task detail into the progress log.)
 
 ---
 
@@ -11,7 +11,7 @@ This is a standalone record of what was inspected, researched, decided, and inst
 
 Read-only inspection of the current repository state before any research or installation:
 
-- `CLAUDE.md`, `README.md`, all of `docs/` (project.md, product.md, requirements.md, architecture.md, database.md, ai-generation.md, ui.md, progress.md), all files under `tasks/`, all files under `tests/`.
+- `CLAUDE.md`, `README.md`, all of `docs/` (project.md, product.md, requirements.md, architecture.md, database.md, ai-generation.md, ui.md, progress.md), all files under `docs/tasks/`, all files under `tests/`.
 - `package.json` — dependencies, devDependencies, scripts.
 - `next.config.ts` — effectively a stub, no custom options.
 - `tsconfig.json` — strict mode, `@/*` path alias, Next.js TS plugin.
@@ -32,7 +32,7 @@ Researched via web search and official documentation fetches (Claude Code docs, 
 | Core app dev (Next.js/React/TS) | Next.js 16.3+ already auto-generates and injects an agent-rules block into `CLAUDE.md` via `next dev` (observed firsthand in TASK-001/002) — automatic, nothing to install. Vercel's official Next.js "Cache Components" skills exist but target a feature this project doesn't use. |
 | Database (Prisma/PostgreSQL) | **Real gap.** Prisma ships an official, vendor-maintained skill package (`prisma/skills`) covering exactly this stack. |
 | Testing (TDD/Vitest/RTL) | No official Vitest-maintained skill exists. Community options found have no clear maintenance/trust signal. Existing setup already works (21/21 tests passing). |
-| AI application dev (LLM/SDKs/structured output/prompt engineering) | Provider is explicitly undecided per `docs/ai-generation.md`. Prompt/context engineering is this project's *own research subject*, already documented in depth. The bundled `claude-api` skill already covers the most likely provider (Anthropic) with zero installation needed. |
+| AI application dev (LLM/SDKs/structured output/prompt engineering) | Provider is explicitly undecided per `docs/project-management/ai-generation.md`. Prompt/context engineering is this project's *own research subject*, already documented in depth. The bundled `claude-api` skill already covers the most likely provider (Anthropic) with zero installation needed. |
 | Engineering workflow (code review, debugging, docs, git) | Already covered by Claude Code's own bundled skills (`/code-review`, `/debug`, `/verify`, `/run`) and native git tooling — no gap. |
 
 ---
@@ -44,13 +44,13 @@ Researched via web search and official documentation fetches (Claude Code docs, 
 | `prisma-cli` | Database | `prisma/skills` (official, Prisma) | **MUST HAVE — installed** | CLI reference (init, generate, migrate, studio) directly needed for TASK-004. |
 | `prisma-client-api` | Database | `prisma/skills` (official, Prisma) | **MUST HAVE — installed** | Client API reference (CRUD, queries, transactions) directly needed for the data-access layer in TASK-005+. |
 | `prisma-database-setup` | Database | `prisma/skills` (official, Prisma) | **MUST HAVE — installed** | Multi-provider (incl. PostgreSQL) connection/config guidance — directly needed for TASK-004. |
-| `prisma-postgres` / `prisma-postgres-setup` | Database | `prisma/skills` (official, Prisma) | **NOT NEEDED — installed then removed** | Covers *Prisma Postgres*, Prisma's own hosted/managed database product (Console, `create-db` CLI, Management API). MathQuestAI already has an existing, manually-created PostgreSQL database (`docs/database.md`) — this is a different product, not applicable. `prisma-postgres-setup` was also flagged **High Risk** by the installer's built-in Socket/Snyk risk assessment. |
+| `prisma-postgres` / `prisma-postgres-setup` | Database | `prisma/skills` (official, Prisma) | **NOT NEEDED — installed then removed** | Covers *Prisma Postgres*, Prisma's own hosted/managed database product (Console, `create-db` CLI, Management API). MathQuestAI already has an existing, manually-created PostgreSQL database (`docs/project-management/database.md`) — this is a different product, not applicable. `prisma-postgres-setup` was also flagged **High Risk** by the installer's built-in Socket/Snyk risk assessment. |
 | `prisma-compute` | Deployment | `prisma/skills` (official, Prisma) | **NOT NEEDED — installed then removed** | Deployment to Prisma's own cloud compute platform — MathQuestAI is a local research prototype, not deploying there. Flagged **Med Risk**. |
 | `prisma-mongodb-upgrade` | Database | `prisma/skills` (official, Prisma) | **NOT NEEDED — installed then removed** | MongoDB-specific; MathQuestAI uses PostgreSQL exclusively. |
 | `prisma-driver-adapter-implementation` | Database | `prisma/skills` (official, Prisma) | **NOT NEEDED — installed then removed** | Advanced/niche topic (writing custom Prisma driver adapters) — out of scope for a standard Postgres connection in a research prototype. |
 | `prisma-upgrade-v7` | Database | `prisma/skills` (official, Prisma) | **NOT NEEDED — installed then removed** | An upgrade guide from older Prisma versions to v7. MathQuestAI has no existing Prisma install to upgrade from — this task will do a fresh v7 install in TASK-004. |
 | `vercel/next.js` — `next-cache-components-optimizer`, `next-cache-components-adoption` | Core app dev | Vercel (official, version-matched to Next.js) | **NOT NEEDED / OPTIONAL later** | Specific to the Next.js "Cache Components" feature, which the app doesn't use. Revisit if adopted. |
-| `vercel-labs/agent-skills` (React/Next.js performance, 40+ rules) | Core app dev | Vercel (official) | **NOT NEEDED** | Actively conflicts with the project's own stated principle (`docs/architecture.md` §28, `CLAUDE.md`): "avoid premature optimization... this is a research project." |
+| `vercel-labs/agent-skills` (React/Next.js performance, 40+ rules) | Core app dev | Vercel (official) | **NOT NEEDED** | Actively conflicts with the project's own stated principle (`docs/project-management/architecture.md` §28, `CLAUDE.md`): "avoid premature optimization... this is a research project." |
 | Community Vitest/TDD skills (e.g. `secondsky/claude-skills`, `sanity-io/next-sanity`) | Testing | Unverified individuals / unrelated projects | **NOT NEEDED** | No official Vitest-maintained skill exists. No clear maintenance signal on the alternatives. A skill can execute shell commands once installed — installing from unverified sources for negligible marginal benefit (existing setup already works) isn't justified. |
 | Generic "AI SDK / structured output / prompt engineering" skills | AI application dev | Various, mostly community | **NOT NEEDED** | Provider undecided; prompt/context engineering is the project's own research domain, already documented. Bundled `claude-api` skill already covers the likely provider. |
 | `anthropics/skills` — "webapp-testing" (Playwright e2e) | Testing | Anthropic (official) | **NOT NEEDED** | Project docs explicitly state e2e testing isn't currently planned. |
@@ -69,7 +69,7 @@ Researched via web search and official documentation fetches (Claude Code docs, 
 
 ### `prisma-client-api`
 - **What it does:** Reference for the Prisma Client API — CRUD operations, query options/filters, relations, transactions, raw queries.
-- **Why MathQuestAI needs it:** The application's data-access layer (Subject/Topic/Subtopic/QuestionPattern/ReferenceQuestion/QuestionGenerationRequest queries, per `docs/database.md`) will be built with Prisma Client. Correct, current API usage matters for a project that explicitly prioritizes correctness.
+- **Why MathQuestAI needs it:** The application's data-access layer (Subject/Topic/Subtopic/QuestionPattern/ReferenceQuestion/QuestionGenerationRequest queries, per `docs/project-management/database.md`) will be built with Prisma Client. Correct, current API usage matters for a project that explicitly prioritizes correctness.
 - **How Claude Code is expected to use it:** Loaded automatically when writing Prisma Client queries in `lib/db/` (or equivalent) during TASK-005 (dynamic educational data loading) and beyond.
 
 ### `prisma-database-setup`
@@ -88,8 +88,8 @@ The bulk command installs all 9 skills in the `prisma/skills` repo by default; t
 See the "Skills investigated" table (§3) for the full list and reasoning. The most important rejections, restated:
 
 - **`prisma-postgres` / `prisma-postgres-setup`** — these are about *Prisma Postgres*, Prisma's own hosted database product, not generic PostgreSQL. MathQuestAI connects to an existing, separately-managed PostgreSQL instance. Installing these risks steering future database work toward provisioning a new managed database MathQuestAI doesn't need. `prisma-postgres-setup` was also independently flagged **High Risk** by the installer's Socket/Snyk assessment (likely due to the broader API/network operations a provisioning skill needs to describe).
-- **Generic AI SDK / prompt-engineering skills** — MathQuestAI's own `docs/ai-generation.md` and `docs/project.md` already define the project's prompt/context-engineering strategy in detail; this *is* the project's research subject. An external, generic skill on the same topic risks quietly overriding project-specific methodology, which the task's Rule 4/5 explicitly warns against.
-- **Vercel's React/Next.js performance skill** — actively contradicts `docs/architecture.md`'s and `CLAUDE.md`'s own stated principle to avoid premature optimization in a research prototype.
+- **Generic AI SDK / prompt-engineering skills** — MathQuestAI's own `docs/project-management/ai-generation.md` and `docs/project-management/project.md` already define the project's prompt/context-engineering strategy in detail; this *is* the project's research subject. An external, generic skill on the same topic risks quietly overriding project-specific methodology, which the task's Rule 4/5 explicitly warns against.
+- **Vercel's React/Next.js performance skill** — actively contradicts `docs/project-management/architecture.md`'s and `CLAUDE.md`'s own stated principle to avoid premature optimization in a research prototype.
 - **Community-maintained Vitest/testing skills** — no official option exists, and the ones found have no clear maintenance or trust signal; the existing Vitest + RTL setup (21/21 tests passing) already works, so the marginal benefit doesn't justify installing arbitrary third-party instruction files that can execute shell commands.
 
 ---
@@ -106,13 +106,13 @@ See the "Skills investigated" table (§3) for the full list and reasoning. The m
 - `CLAUDE.md` was **not** modified. Nothing about the installed skills conflicts with or requires a change to project-level instructions — the skills are purely additive reference material, scoped to `.claude/skills/`, and don't override any documented project decision.
 
 **Documentation updated:**
-- `docs/progress.md` — one-line note recording this task's completion and a pointer to this report (task numbering also corrected: this was inserted as TASK-003, shifting the former TASK-003/004/005 to TASK-004/005/006).
-- This report (`agent-feedbacks/TASK-003-agent-skills-report.md`) — the detailed record.
+- `docs/project-management/progress.md` — one-line note recording this task's completion and a pointer to this report (task numbering also corrected: this was inserted as TASK-003, shifting the former TASK-003/004/005 to TASK-004/005/006).
+- This report (`docs/agent-feedbacks/TASK-003-agent-skills-report.md`) — the detailed record.
 
 **New files/directories created:**
 - `.claude/skills/prisma-cli/`, `.claude/skills/prisma-client-api/`, `.claude/skills/prisma-database-setup/`
 - `skills-lock.json` (project root)
-- `agent-feedbacks/TASK-003-agent-skills-report.md` (this file)
+- `docs/agent-feedbacks/TASK-003-agent-skills-report.md` (this file)
 
 ---
 
@@ -121,4 +121,4 @@ See the "Skills investigated" table (§3) for the full list and reasoning. The m
 - `.claude/skills/` contains exactly 3 skill folders, each with a valid `SKILL.md` (YAML frontmatter with `name`, `description`, `license`, `metadata` present and well-formed).
 - `skills-lock.json` reflects only the 3 kept skills after removal.
 - `npm run lint`, `npm run test` (21/21 passing), and `npm run build` all still pass, confirming no accidental side effects on the application.
-- `git status` confirms only `.claude/`, `skills-lock.json`, `docs/progress.md`, and this report were added/changed by this task — no application source touched.
+- `git status` confirms only `.claude/`, `skills-lock.json`, `docs/project-management/progress.md`, and this report were added/changed by this task — no application source touched.

@@ -65,7 +65,7 @@ export const COVERAGE_RESULT: CoverageResult = {
 };
 
 // Pattern names aligned to the real seeded Algebra / Simplify-Calculate
-// Question Patterns (docs/database.md §26), replacing the reference's
+// Question Patterns (docs/project-management/database.md §26), replacing the reference's
 // placeholder names ("Direct Equation", "Multi-step Equation", "Missing
 // Value"). "Word Problem" and "Multiple Choice" are Question Type labels
 // reused here by the reference and are left unchanged.

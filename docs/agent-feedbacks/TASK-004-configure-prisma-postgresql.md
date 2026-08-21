@@ -15,15 +15,15 @@
 - Created `lib/prisma.ts` (hot-reload-safe singleton, using the `PrismaPg` driver adapter — the required v7 pattern).
 - Created `app/dev/db-check/page.tsx` — a temporary, unlinked dev-only route that queries and displays real Subject records, forced to render dynamically (`force-dynamic`) so it re-queries the database on every visit rather than showing a build-time snapshot.
 - Added 2 integration tests (`tests/integration/database-connection.test.ts`) against the real database: fetching Subjects, and resolving Question Patterns via the Subtopic relation. Both pass.
-- Recorded one genuine, previously-undocumented schema detail in `docs/database.md` (see below).
+- Recorded one genuine, previously-undocumented schema detail in `docs/project-management/database.md` (see below).
 
 ## Database inspection results
 
-**Tables found (6):** `subjects`, `topics`, `subtopics`, `question_patterns`, `reference_questions`, `question_generation_requests` — matches `docs/database.md`'s conceptual model exactly in structure and hierarchy.
+**Tables found (6):** `subjects`, `topics`, `subtopics`, `question_patterns`, `reference_questions`, `question_generation_requests` — matches `docs/project-management/database.md`'s conceptual model exactly in structure and hierarchy.
 
-**One real discrepancy found and documented (not silently changed):** `subjects` has a `language VARCHAR(50)` column with a unique constraint on `(name, language)`, which `docs/database.md` never mentioned. I judged the database to be the source of truth here (per the doc's own §29 principle) and added a short note to `docs/database.md` §5 recording it, since it's additive and non-conflicting — not a redesign. **You may want to confirm this was intentional** (e.g. future multi-language support) since it wasn't previously written down anywhere.
+**One real discrepancy found and documented (not silently changed):** `subjects` has a `language VARCHAR(50)` column with a unique constraint on `(name, language)`, which `docs/project-management/database.md` never mentioned. I judged the database to be the source of truth here (per the doc's own §29 principle) and added a short note to `docs/project-management/database.md` §5 recording it, since it's additive and non-conflicting — not a redesign. **You may want to confirm this was intentional** (e.g. future multi-language support) since it wasn't previously written down anywhere.
 
-**Also confirmed:** the 5 known seeded QuestionPattern UUIDs from `docs/database.md` §26, and the documented absence of a `QuestionCount` column on `question_generation_requests`, both match the real database exactly.
+**Also confirmed:** the 5 known seeded QuestionPattern UUIDs from `docs/project-management/database.md` §26, and the documented absence of a `QuestionCount` column on `question_generation_requests`, both match the real database exactly.
 
 ## Action needed from you
 
@@ -38,7 +38,7 @@
 
 ## Deviations from the task's instructions
 
-None of substance — followed the approved plan directly. The task file itself references `tasks/backlog/TASK-003-configure-prisma-postgresql.md` and `tasks/README.md`, which don't exist under those names anymore (task numbering/folder structure changed since TASK-003-I) — harmless, didn't affect the work.
+None of substance — followed the approved plan directly. The task file itself references `docs/tasks/backlog/TASK-003-configure-prisma-postgresql.md` and `docs/tasks/README.md`, which don't exist under those names anymore (task numbering/folder structure changed since TASK-003-I) — harmless, didn't affect the work.
 
 ## Suggestions
 
@@ -67,5 +67,5 @@ No migrations, seeding, or destructive commands were run at any point.
 
 ### Documentation Changes
 
-- `docs/database.md` §5 — added the `language` column note.
-- `docs/progress.md` — updated separately with a summary entry.
+- `docs/project-management/database.md` §5 — added the `language` column note.
+- `docs/project-management/progress.md` — updated separately with a summary entry.
