@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Subject {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @db.VarChar(100)
+  language  String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  topics    Topic[]
+
+  @@unique([name, language], map: "uq_subject_name_language")
+  @@map("subjects")
+}
+
+model Topic {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subjectId String    @map("subject_id") @db.Uuid
+  name      String    @db.VarChar(100)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  subject   Subject   @relation(fields: [subjectId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_topics_subject")
+  subtopics Subtopic[]
+
+  @@unique([subjectId, name], map: "uq_topic_subject_name")
+  @@map("topics")
+}
+
+model Subtopic {
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  topicId          String            @map("topic_id") @db.Uuid
+  name             String            @db.VarChar(150)
+  concept          String?
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime          @default(now()) @map("updated_at") @db.Timestamptz(6)
+  topic            Topic             @relation(fields: [topicId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_subtopics_topic")
+  questionPatterns QuestionPattern[]
+
+  @@unique([topicId, name], map: "uq_subtopic_topic_name")
+  @@map("subtopics")
+}
+
+model QuestionPattern {
+  id                        String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subtopicId                String                     @map("subtopic_id") @db.Uuid
+  name                      String                     @db.VarChar(150)
+  createdAt                 DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime                   @default(now()) @map("updated_at") @db.Timestamptz(6)
+  subtopic                  Subtopic                   @relation(fields: [subtopicId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_question_patterns_subtopic")
+  referenceQuestions        ReferenceQuestion[]
+  questionGenerationRequests QuestionGenerationRequest[]
+
+  @@unique([subtopicId, name], map: "uq_question_pattern_subtopic_name")
+  @@map("question_patterns")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ReferenceQuestion {
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  questionPatternId String          @map("question_pattern_id") @db.Uuid
+  difficultyLevel   String          @map("difficulty_level") @db.VarChar(20)
+  questionText      String          @map("question_text")
+  expectedAnswer    String          @map("expected_answer")
+  explanation       String?
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime        @default(now()) @map("updated_at") @db.Timestamptz(6)
+  questionPattern   QuestionPattern @relation(fields: [questionPatternId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reference_questions_question_pattern")
+
+  @@map("reference_questions")
+}
+
+model QuestionGenerationRequest {
+  id                String          @id @db.Uuid
+  questionPatternId String          @map("question_pattern_id") @db.Uuid
+  difficultyLevel   String          @map("difficulty_level") @db.VarChar(20)
+  generationPrompt  String          @map("generation_prompt")
+  questionPattern   QuestionPattern @relation(fields: [questionPatternId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_question_generation_requests_question_pattern")
+
+  @@unique([questionPatternId, difficultyLevel], map: "uq_question_generation_requests_pattern_difficulty")
+  @@map("question_generation_requests")
+}
