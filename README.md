@@ -155,7 +155,7 @@ Subject:
 Mathematics
 
 Subtopic:
-Simplify / Calculate
+Simplify & Calculate
 
 Question Pattern:
 Combine Like Terms
@@ -328,15 +328,22 @@ It is interested in:
 
 > "Did the AI generate a good question given the supplied context?"
 
-The Evaluation page will eventually allow generated questions to be reviewed.
+The Evaluation page reports on **the prompt**, not the questions and not the AI model. Its measure of success is that after reading it, a researcher knows what to change in the prompt before the next run.
 
-Evaluation helps identify weaknesses in:
+Because the prompt is assembled from seven distinct sections, each one maps to a measurable dimension, and the overall score decomposes along the prompt's own structure:
 
-- Prompt design
-- Educational context
-- Reference questions
-- Difficulty guidance
-- Question pattern instructions
+| Prompt section | What is measured |
+|---|---|
+| Generation Requirement | Was the requested question count produced? |
+| Educational Context | Did questions stay within the listed question patterns? |
+| Difficulty | Does observed complexity match the requested band? |
+| Question Type | Did questions use only the requested types? |
+| Reference Questions | Were the examples learned from without being copied? |
+| Output Format | Did the output follow the required structure? |
+
+Every finding therefore points at a specific, editable block of prompt text. The page shows the real prompt section by section with a verdict on each, per-question evidence for every deviation, and concrete replacement text for each recommendation.
+
+The evaluation is **fully deterministic** — no second AI call is involved. This keeps the measurement reproducible, so a change in score between runs is attributable to the prompt rather than to a judge model's variance. Where something cannot be measured exactly (difficulty, reference alignment) it is labelled a proxy, shown with its raw signals, and never presented as semantic truth.
 
 Generation and evaluation are intentionally separate concerns.
 
@@ -451,7 +458,7 @@ Important project context is stored in:
 ```text
 CLAUDE.md
 docs/
-tasks/
+docs/tasks/
 ```
 
 The intended workflow is:
@@ -501,7 +508,7 @@ These documents prevent important decisions and project context from existing on
 Tasks are maintained separately:
 
 ```text
-tasks/
+docs/tasks/
 ├── README.md
 ├── backlog/
 ├── in-progress/
@@ -742,7 +749,35 @@ Use the project's environment configuration conventions and ensure local environ
 
 ---
 
-## 25. High-Level Repository Structure
+## 25. Local AI Configuration
+
+MathQuestAI talks to any **OpenAI-compatible** AI provider (Groq, Gemini's OpenAI-compatible endpoint, OpenAI itself, or any other provider exposing the same `chat/completions` API shape). Switching providers is a `.env.local` change only — no source file edits are needed.
+
+### 1. Get an API key
+
+Today's setup uses [Groq](https://console.groq.com/) — create an API key there. Any other OpenAI-compatible provider's key works the same way, just with a different `AI_BASE_URL`/`AI_MODEL`.
+
+### 2. Configure the local environment
+
+Create `.env.local` in the project root and add:
+
+```env
+AI_API_KEY=your-api-key-here
+AI_MODEL=openai/gpt-oss-120b
+AI_BASE_URL=https://api.groq.com/openai/v1
+```
+
+`AI_MODEL` and `AI_BASE_URL` are optional — they default to Groq's model/endpoint if omitted. Set them explicitly to point at a different OpenAI-compatible provider.
+
+Never commit `.env.local` or expose the API key publicly.
+
+### 3. Run the application
+
+Start MathQuestAI using the normal development command (`npm run dev`).
+
+---
+
+## 26. High-Level Repository Structure
 
 The project is expected to evolve toward:
 
@@ -761,7 +796,7 @@ MathQuestAI/
 │
 ├── docs/
 │
-├── tasks/
+├── docs/tasks/
 │   ├── backlog/
 │   ├── in-progress/
 │   └── completed/
@@ -776,7 +811,7 @@ The actual implementation may evolve as the project develops.
 
 ---
 
-## 26. Definition of Success
+## 27. Definition of Success
 
 The project is successful if it can demonstrate a repeatable process where:
 
@@ -802,7 +837,7 @@ The goal is:
 
 ---
 
-## 27. Documentation Entry Points
+## 28. Documentation Entry Points
 
 When working on the project, start with:
 
@@ -813,18 +848,18 @@ CLAUDE.md
 Then review the relevant documentation:
 
 ```text
-docs/project.md
-docs/product.md
-docs/requirements.md
-docs/architecture.md
-docs/database.md
-docs/ai-generation.md
+docs/project-management/project.md
+docs/project-management/product.md
+docs/project-management/requirements.md
+docs/project-management/architecture.md
+docs/project-management/database.md
+docs/project-management/ai-generation.md
 ```
 
 Then identify the current task under:
 
 ```text
-tasks/
+docs/tasks/
 ```
 
 ---

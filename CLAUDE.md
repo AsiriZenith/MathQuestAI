@@ -127,15 +127,16 @@ Before implementing a feature, read the relevant documentation.
 
 ### Documentation
 
-- `docs/project.md` — overall project context and current project state
-- `docs/product.md` — product definition and goals
-- `docs/requirements.md` — functional requirements and user flows
-- `docs/architecture.md` — technical architecture
-- `docs/database.md` — database structure and relationships
-- `docs/ai-generation.md` — AI generation, context and prompt strategy
-- `docs/ui.md` — UI pages, routes and design decisions
-- `docs/development.md` — development workflow and TDD practices
-- `docs/progress.md` — current project progress and completed/in-progress work
+- `docs/project-management/project.md` — overall project context and current project state
+- `docs/project-management/product.md` — product definition and goals
+- `docs/project-management/requirements.md` — functional requirements and user flows
+- `docs/project-management/architecture.md` — technical architecture
+- `docs/project-management/database.md` — database structure and relationships
+- `docs/project-management/ai-generation.md` — AI generation, context and prompt strategy
+- `docs/project-management/ui.md` — UI pages, routes and design decisions
+- `docs/project-management/progress.md` — current project progress and completed/in-progress work
+
+Development workflow and TDD practices are covered inline in §3 of this file and in `docs/tasks/tasks_README.md` — there is no separate `docs/development.md` (reviewed and confirmed unnecessary three times: TASK-003-I, a progress.md follow-up, and TASK-011; existing coverage is sufficient and a dedicated file would be redundant).
 
 If documentation conflicts with assumptions in the code, stop and identify the conflict rather than silently choosing an implementation.
 
@@ -198,7 +199,7 @@ If something is unclear and the decision affects architecture, data structure, r
 
 An existing React project generated from the Figma design is available at:
 
-`D:\my works\MathQuestAI\`
+`D:\my works\MathQuestAI_UI\`
 
 This project is a READ-ONLY reference project.
 
@@ -206,11 +207,11 @@ It contains the UI pages and design that should be reproduced in the actual Next
 
 ### Important rules
 
-- Do NOT modify the project at `D:\my works\MathQuestAI\`.
+- Do NOT modify the project at `D:\my works\MathQuestAI_UI\`.
 - Inspect it when UI implementation requires it.
 - Reuse its visual structure, page concepts, routes, assets, and design patterns where appropriate.
 - Adapt the implementation to Next.js rather than blindly copying the React project.
-- The actual application is being developed in `D:\my works\ai-bootcamp\`.
+- The actual application is being developed in `D:\my works\MathQuestAI\`.
 
 ---
 
@@ -232,7 +233,7 @@ The database contains concepts such as:
 
 The detailed schema and relationships are documented in:
 
-`docs/database.md`
+`docs/project-management/database.md`
 
 Do not redesign existing database relationships without first reviewing the documented design and identifying the reason for the change.
 
@@ -298,7 +299,7 @@ The objective is to determine which context produces better and more consistent 
 
 Detailed decisions belong in:
 
-`docs/ai-generation.md`
+`docs/project-management/ai-generation.md`
 
 ---
 
@@ -400,7 +401,7 @@ Avoid implementing future requirements prematurely.
 
 Development work should be organized into small tasks under:
 
-`tasks/`
+`docs/tasks/`
 
 Tasks will be created progressively as the project evolves.
 
@@ -432,6 +433,8 @@ Complete
  ↓
 Update Progress
  ↓
+Write Agent Feedback Report
+ ↓
 Review README and docs
 ```
 
@@ -441,7 +444,7 @@ Review README and docs
 
 Current project progress is maintained in:
 
-`docs/progress.md`
+`docs/project-management/progress.md`
 
 This file should provide a high-level view of:
 
@@ -452,7 +455,7 @@ This file should provide a high-level view of:
 - Blockers
 - Research iterations
 
-Individual task details remain in `tasks/`.
+Individual task details remain in `docs/tasks/`.
 
 The progress document should answer:
 
@@ -462,13 +465,38 @@ The task files should answer:
 
 > "What exactly are we doing?"
 
-Do not duplicate detailed task content inside `docs/progress.md`.
+Do not duplicate detailed task content inside `docs/project-management/progress.md`.
 
-Update `docs/progress.md` when a meaningful task is started or completed.
+Update `docs/project-management/progress.md` when a meaningful task is started or completed.
 
 ---
 
-## 18. Testing
+## 18. Agent Feedback Reports
+
+After completing each task, write a Markdown file into:
+
+`docs/agent-feedbacks/`
+
+The file should be named after the task (e.g. `TASK-004-configure-prisma-postgresql.md`), so the developer can read it manually before deciding whether to proceed to the next task.
+
+The report should cover:
+
+- What was actually done (task output/result summary).
+- Any action the developer needs to take before the next task proceeds (approvals, credentials, manual verification, environment setup, etc.).
+- Any risky or judgment-call decisions made during the task, and why.
+- Any deviations from the task's original instructions, and why.
+- Suggestions or concerns for the developer to consider going forward.
+
+This is separate from `docs/project-management/progress.md`:
+
+- `docs/project-management/progress.md` stays a short, high-level, continuously-updated project state.
+- `docs/agent-feedbacks/<task-name>.md` is a one-time, detailed, per-task record — written once when the task completes and not edited afterward, except to append a follow-up if the developer asks a question about it.
+
+Do not skip this step for meaningful tasks. It may be brief for small or low-risk tasks, but it should still exist.
+
+---
+
+## 19. Testing
 
 Tests are organized under:
 
@@ -498,7 +526,7 @@ Where possible, deterministic tests should not depend on a live AI API call.
 
 ---
 
-## 19. Change Management
+## 20. Change Management
 
 When a change affects:
 
@@ -520,7 +548,7 @@ If an existing decision appears problematic, explain the issue and propose an al
 
 ---
 
-## 20. Current Development Strategy
+## 21. Current Development Strategy
 
 The project will be developed incrementally.
 
@@ -543,7 +571,7 @@ Later stages should only be implemented when the requirements are defined.
 
 ---
 
-## 21. Initial Tasks
+## 22. Initial Tasks
 
 The initial tasks are intentionally limited.
 
@@ -567,7 +595,7 @@ Additional tasks will be created as the project progresses.
 
 ---
 
-## 22. Important Rule
+## 23. Important Rule
 
 When working on MathQuestAI, optimize for:
 
