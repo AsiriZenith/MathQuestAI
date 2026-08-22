@@ -22,6 +22,7 @@ you move on.
 1. [Prerequisites](#step-1--prerequisites)
 2. [Clone and install](#step-2--clone-and-install)
 3. [Set up the database](#step-3--set-up-the-database)
+   - [No PostgreSQL yet? Choose a setup option](#30-no-postgresql-yet-choose-a-setup-option)
 4. [Configure environment variables](#step-4--configure-environment-variables)
 5. [Generate the Prisma Client](#step-5--generate-the-prisma-client)
 6. [Configure the AI provider](#step-6--configure-the-ai-provider)
@@ -41,8 +42,8 @@ Install these before anything else.
 | --- | --- | --- |
 | **Node.js** | **20.9 or newer** (22 LTS recommended) | Required by Next.js 16. Verified on Node 22.22.1. |
 | **npm** | 10 or newer | Ships with Node. |
-| **PostgreSQL** | **13 or newer** (15 recommended) | Verified on PostgreSQL 15.12. Version 13+ is required because the schema uses the built-in `gen_random_uuid()`. |
-| **pgAdmin 4** | Any recent version | Usually bundled with the PostgreSQL Windows installer. Used to restore the database backup. |
+| **PostgreSQL** | **15 or newer** | The backup is dumped from PostgreSQL 15.12, and `pg_restore` cannot load a v15 dump into an older server. **Don't have it installed? See [Step 3.0](#30-no-postgresql-yet-choose-a-setup-option).** |
+| **pgAdmin 4** | Any recent version | Optional — only if you want a GUI. Bundled with the PostgreSQL Windows installer. |
 | **Git** | Any recent version | |
 
 Check what you have:
@@ -90,6 +91,142 @@ a populated database, the app cannot build a prompt and nothing will generate.
 >   migrations to apply, and those commands can alter or wipe the real schema. The
 >   database is the source of truth — the Prisma schema follows it, not the reverse.
 
+### 3.0 No PostgreSQL yet? Choose a setup option
+
+Skip this if you already have PostgreSQL 15+ running. Otherwise pick one:
+
+| Your situation | Use |
+| --- | --- |
+| Normal dev machine, want a GUI (pgAdmin) | **Option A — installer** |
+| Docker already installed, want zero system changes and easy cleanup | **Option B — Docker** |
+| Comfortable in a terminal, want one command | **Option C — package manager** |
+| Can't install software, or very low disk space | **Option D — hosted** |
+
+Whichever you choose, **the rest of this guide is identical** — only your
+`DATABASE_URL` in Step 4 changes.
+
+---
+
+#### Option A — Official installer (recommended for most people)
+
+Download from <https://www.postgresql.org/download/> and pick **version 15 or 16**.
+
+The installer bundles everything you need: the server, **pgAdmin 4**, and the
+`psql` / `pg_restore` command-line tools.
+
+During installation:
+
+- **Remember the password you set for the `postgres` user** — it goes straight into
+  `DATABASE_URL` in Step 4.
+- Keep the default port **5432**.
+- Leave the "Stack Builder" step unchecked; you don't need it.
+
+**Windows:** if `psql --version` says "command not found" afterwards, the tools
+installed fine but aren't on your PATH. Add this folder to your PATH environment
+variable (adjust the version number):
+
+```text
+C:\Program Files\PostgreSQL\15\bin
+```
+
+---
+
+#### Option B — Docker (fastest, if you already have Docker)
+
+One command gives you a running PostgreSQL 15 with the database already created.
+It is written on a single line so it works in PowerShell, Command Prompt and bash
+alike:
+
+```bash
+docker run --name mathquestai-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=MathQuestAI -p 5432:5432 -v mathquestai-data:/var/lib/postgresql/data -d postgres:15
+```
+
+| Flag | Why |
+| --- | --- |
+| `-e POSTGRES_PASSWORD=postgres` | Password for the `postgres` user — use it in `DATABASE_URL` |
+| `-e POSTGRES_DB=MathQuestAI` | Creates the database on first start, capitals preserved |
+| `-p 5432:5432` | Exposes the server on `localhost:5432` |
+| `-v mathquestai-data:...` | Stores data in a named volume so it survives the container |
+| `-d postgres:15` | Runs detached, pinned to PostgreSQL 15 to match the backup |
+
+> **This creates the database for you**, with the capital letters intact — so you can
+> **skip Step 3.2** and go straight to restoring the backup in Step 3.3.
+
+Your `DATABASE_URL` for Step 4:
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/MathQuestAI?schema=public"
+```
+
+Managing the container:
+
+```bash
+docker stop mathquestai-db     # stop it (data is kept)
+docker start mathquestai-db    # start it again
+docker logs mathquestai-db     # check it started cleanly
+docker rm -f mathquestai-db    # remove the container (named volume survives)
+docker volume rm mathquestai-data   # delete the data permanently
+```
+
+To browse the data, either install **pgAdmin 4 standalone** and connect it to
+`localhost:5432`, or use the shell inside the container:
+
+```bash
+docker exec -it mathquestai-db psql -U postgres -d MathQuestAI
+```
+
+> Docker Desktop must actually be **running** before any `docker` command works. If
+> you see `error during connect ... docker_engine`, start Docker Desktop and retry.
+
+---
+
+#### Option C — Package manager (one-liners)
+
+```bash
+# Windows
+winget install PostgreSQL.PostgreSQL.16
+winget install PostgreSQL.pgAdmin          # optional GUI, installed separately
+
+# macOS
+brew install postgresql@16
+brew services start postgresql@16
+
+# Ubuntu / Debian
+sudo apt update && sudo apt install postgresql
+```
+
+Note that package-manager installs usually **do not** include pgAdmin — install it
+separately (as above) or just use `psql` from the command line. On macOS with
+Homebrew, the default superuser is your own macOS username rather than `postgres`,
+so adjust `DATABASE_URL` accordingly.
+
+---
+
+#### Option D — Hosted PostgreSQL (no local install)
+
+Use this only if you genuinely can't install software locally. Free options include
+[Neon](https://neon.tech/) and [Supabase](https://supabase.com/) — sign up, create a
+project, and copy the connection string they give you.
+
+> ⚠️ **Check with the project owner first.** This route uploads the project's database
+> backup to a third-party service rather than keeping it on your machine.
+
+Things that differ from a local setup:
+
+- **Append `sslmode=require`** — hosted providers reject unencrypted connections:
+  ```env
+  DATABASE_URL="postgresql://user:password@host.neon.tech/neondb?schema=public&sslmode=require"
+  ```
+- **Don't rename the database.** The provider assigns a name (Neon uses `neondb`).
+  Keep it and make sure `DATABASE_URL` matches — the name `MathQuestAI` isn't special,
+  it just has to agree with your connection string. **Skip Step 3.2.**
+- **You still need `pg_restore` locally** to load a custom-format backup. A plain
+  `.sql` dump can instead be pasted into the provider's web SQL editor.
+- **Expect it to feel slower.** Every query is a network round-trip, and free tiers
+  suspend after inactivity, so the first request after a pause is sluggish.
+
+---
+
 ### 3.1 Get the backup file
 
 Ask the project owner for the database backup. It will be one of:
@@ -102,8 +239,15 @@ before continuing. Save the file somewhere simple, e.g. `C:\temp\mathquestai.bac
 
 ### 3.2 Create an empty database named `MathQuestAI`
 
+> **Skip this step** if you used **Option B (Docker)** — `POSTGRES_DB` already created
+> it — or **Option D (hosted)**, where the provider assigns the name.
+
 The database must be named **exactly `MathQuestAI`** — same capital letters. This is
 the name the connection string in Step 4 expects.
+
+> There is nothing magic about the name itself. It only has to **match whatever you
+> put in `DATABASE_URL`**. If you deliberately use a different name, change it in both
+> places and everything works the same.
 
 **Using pgAdmin:**
 
@@ -160,6 +304,33 @@ psql -U postgres -d MathQuestAI -f C:/temp/mathquestai.sql
 
 > Make sure you are connected to `MathQuestAI` and not `postgres` before executing —
 > running the script against the wrong database is the most common mistake here.
+
+**If you used Option B (Docker):**
+
+The backup file lives on your machine, not inside the container, so pipe it in over
+standard input:
+
+```bash
+# custom-format backup
+docker exec -i mathquestai-db pg_restore -U postgres -d MathQuestAI --no-owner --no-privileges < C:/temp/mathquestai.backup
+
+# plain .sql dump
+docker exec -i mathquestai-db psql -U postgres -d MathQuestAI < C:/temp/mathquestai.sql
+```
+
+> **PowerShell users:** PowerShell doesn't support `<` input redirection, and piping
+> binary data through it corrupts the file. Copy the backup into the container first
+> and restore from there instead — this works in every shell:
+>
+> ```powershell
+> docker cp C:\temp\mathquestai.backup mathquestai-db:/tmp/backup.dump
+> docker exec mathquestai-db pg_restore -U postgres -d MathQuestAI --no-owner --no-privileges /tmp/backup.dump
+> ```
+>
+> For a plain `.sql` dump, `docker cp` it the same way and run
+> `docker exec mathquestai-db psql -U postgres -d MathQuestAI -f /tmp/backup.sql`.
+
+> Note the `-i` flag (not `-it`). Without it, the file never reaches the command.
 
 ### 3.4 Verify the restore
 
@@ -483,7 +654,12 @@ fake everywhere. Tests read `DATABASE_URL` from `.env.local`.
 | `Cannot find module '@/lib/generated/prisma/client'` | Prisma Client never generated | `npx prisma generate` (Step 5) |
 | Prisma CLI says the URL is missing, but your env file looks fine | Your file is named `.env`, not `.env.local` | Rename it to `.env.local` (Step 4) |
 | `database "MathQuestAI" does not exist` | Created without quotes, so it became lowercase `mathquestai` | Recreate with `CREATE DATABASE "MathQuestAI";` (Step 3.2) |
+| `psql: command not found` / `'psql' is not recognized` | PostgreSQL installed, but its `bin` folder isn't on PATH | Add `C:\Program Files\PostgreSQL\15\bin` to PATH (Step 3.0, Option A) |
 | `password authentication failed for user "postgres"` | Wrong password, or unencoded special characters | Fix the password and URL-encode it (Step 4) |
+| `unsupported version` or `server version mismatch` during restore | Your server is older than the v15 dump | Install PostgreSQL 15 or newer (Step 1) |
+| `port is already allocated` / `address already in use` starting Docker | A native PostgreSQL is already using 5432 | Either stop it, or run Docker on another port (`-p 5433:5432`) and use `5433` in `DATABASE_URL` |
+| `error during connect ... docker_engine` | Docker Desktop isn't running | Start Docker Desktop, then retry the command |
+| Hosted DB refuses the connection or complains about SSL | Missing SSL parameter | Append `&sslmode=require` to `DATABASE_URL` (Step 3.0, Option D) |
 | `/dev/db-check` returns `[]` | Database created but backup not restored into it | Redo the restore (Step 3.3) and re-verify (Step 3.4) |
 | `Connected: NO` — `AI_API_KEY is not configured.` | Key missing or blank in `.env.local` | Add `AI_API_KEY` (Step 6) |
 | `AI provider request failed with status 401` | Invalid or revoked API key | Regenerate the key at your provider |
@@ -515,6 +691,19 @@ pg_restore -U postgres -d MathQuestAI --no-owner --no-privileges C:/temp/mathque
 
 # 4. Create your env file, then edit it (DATABASE_URL + AI_API_KEY)
 cp .env.example .env.local
+
+# ---------------------------------------------------------------
+# Steps 2 and 3 the Docker way instead (creates the DB for you):
+#
+#   docker run --name mathquestai-db -e POSTGRES_PASSWORD=postgres \
+#     -e POSTGRES_DB=MathQuestAI -p 5432:5432 \
+#     -v mathquestai-data:/var/lib/postgresql/data -d postgres:15
+#
+#   docker exec -i mathquestai-db pg_restore -U postgres -d MathQuestAI \
+#     --no-owner --no-privileges < C:/temp/mathquestai.backup
+#
+#   (both are single-line commands in the Step 3.0 / 3.3 sections)
+# ---------------------------------------------------------------
 
 # 5. Generate the Prisma Client — required, not automatic
 npx prisma generate
