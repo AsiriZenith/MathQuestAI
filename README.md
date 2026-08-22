@@ -699,6 +699,16 @@ Iterative Improvement
 
 ## 23. Getting Started
 
+> **Setting up for the first time? Follow [`SETUP.md`](./SETUP.md).**
+>
+> It is the complete, step-by-step local setup guide — prerequisites, restoring the
+> database backup in pgAdmin, environment variables, generating the Prisma Client,
+> AI provider configuration, verification routes, and troubleshooting.
+>
+> The summary below is a quick reference only. Two steps it omits will break a fresh
+> clone: you must run `npx prisma generate`, and your environment file must be named
+> `.env.local` (not `.env`).
+
 The project is a Next.js application.
 
 The development environment requires:
@@ -746,6 +756,9 @@ AI model
 Do not commit secrets.
 
 Use the project's environment configuration conventions and ensure local environment files are ignored by Git.
+
+The exact variable names, their defaults, and a filled-in example are documented in
+[`SETUP.md` — Configure environment variables](./SETUP.md#step-4--configure-environment-variables).
 
 ---
 
@@ -838,6 +851,12 @@ The goal is:
 ---
 
 ## 28. Documentation Entry Points
+
+To get the project running locally, start with:
+
+```text
+SETUP.md
+```
 
 When working on the project, start with:
 
