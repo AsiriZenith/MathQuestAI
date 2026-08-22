@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, ClipboardCheck, RefreshCw } from "lucide-react";
 import { motion } from "motion/react";
@@ -9,12 +9,16 @@ import { usePracticeSession } from "@/components/providers/practice-session-prov
 import { SelectionSummary } from "@/components/common/selection-summary";
 import { QuestionCoverage } from "./_components/question-coverage";
 import { QuestionCard } from "./_components/question-card";
+import { EvaluationMethodDialog } from "./_components/evaluation-method-dialog";
+import type { EvaluationData } from "@/lib/types";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default function QuestionsPage() {
   const router = useRouter();
-  const { config, generationResponse } = usePracticeSession();
+  const { config, generationContext, generationResponse, generationMeta, setEvaluationData } =
+    usePracticeSession();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!config || !generationResponse) {
@@ -22,7 +26,13 @@ export default function QuestionsPage() {
     }
   }, [config, generationResponse, router]);
 
-  if (!config || !generationResponse) return null;
+  if (!config || !generationResponse || !generationContext || !generationMeta) return null;
+
+  const handleEvaluationPrepared = (data: EvaluationData) => {
+    setEvaluationData(data);
+    setDialogOpen(false);
+    router.push("/evaluation");
+  };
 
   const questions = generationResponse.questions;
 
@@ -90,7 +100,7 @@ export default function QuestionsPage() {
       >
         <button
           type="button"
-          onClick={() => router.push("/evaluation")}
+          onClick={() => setDialogOpen(true)}
           className="font-jakarta w-full flex items-center justify-center gap-3 bg-primary text-primary-foreground font-semibold text-base py-4 rounded-xl shadow-[0_4px_16px_rgba(79,70,229,0.22)] hover:bg-accent hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(79,70,229,0.28)] transition-all duration-200"
         >
           <ClipboardCheck className="w-5 h-5" />
@@ -101,6 +111,16 @@ export default function QuestionsPage() {
           See how well these questions cover the benchmark set and requested difficulty.
         </p>
       </motion.div>
+
+      <EvaluationMethodDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        config={config}
+        generationContext={generationContext}
+        generationResponse={generationResponse}
+        generationMeta={generationMeta}
+        onPrepared={handleEvaluationPrepared}
+      />
     </main>
   );
 }

@@ -163,7 +163,7 @@ Topic:
 Algebra
 
 Subtopic:
-Simplify / Calculate
+Simplify & Calculate
 ```
 
 There are **not** separate concepts such as:
@@ -177,7 +177,7 @@ in this level of the current database design.
 Instead, the current design treats:
 
 ```text
-Simplify / Calculate
+Simplify & Calculate
 ```
 
 as the Subtopic.
@@ -210,7 +210,7 @@ The user selects one Subtopic for a generation request.
 
 A Question Pattern represents a specific and meaningful type of mathematical task within a Subtopic.
 
-For the current `Simplify / Calculate` Subtopic, examples include:
+For the current `Simplify & Calculate` Subtopic, examples include:
 
 - Combine Like Terms
 - Apply Distributive Property
@@ -680,7 +680,7 @@ Subject
         └── Algebra
             │
             └── Subtopic
-                └── Simplify / Calculate
+                └── Simplify & Calculate
                     │
                     ├── Combine Like Terms
                     │   ├── Easy
@@ -755,7 +755,7 @@ Topic
   Algebra
 
 Subtopic
-  Simplify / Calculate
+  Simplify & Calculate
 
 Question Pattern
   Combine Like Terms

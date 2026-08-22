@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import type { SubjectWithSubtopics } from "@/lib/types";
+import type { QuestionPatternsResult, SubjectWithSubtopics } from "@/lib/types";
 
 export async function getSubjectWithSubtopics(
   subjectName: string,
@@ -30,4 +30,19 @@ export async function getSubjectWithSubtopics(
     topic: { id: topic.id, name: topic.name },
     subtopics: topic.subtopics,
   };
+}
+
+export async function getQuestionPatternsForSubtopic(
+  subtopicId: string,
+): Promise<QuestionPatternsResult> {
+  try {
+    const patterns = await prisma.questionPattern.findMany({
+      where: { subtopicId },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    });
+    return { ok: true, patterns };
+  } catch {
+    return { ok: false, error: "Unable to load question patterns." };
+  }
 }

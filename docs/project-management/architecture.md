@@ -170,7 +170,7 @@ The UI should not contain database-specific logic or AI prompt construction logi
 
 # 7. Generation Flow
 
-> **Implementation note (TASK-002):** The recreated UI does not include a "Select Question Pattern(s)" step — Question Pattern is resolved internally rather than user-selected. See `docs/project-management/requirements.md` §6 and `docs/project-management/ui.md` §5.
+> **Implementation note (TASK-010):** TASK-002/TASK-005 initially omitted a "Select Question Pattern(s)" step to match the reference UI exactly. TASK-010 reversed that decision — the Setup screen now includes a Question Pattern selection step as described below, matching the original design. See `docs/tasks/TASK-010-self-evaluation-and-issue-fixes.md`.
 
 The generation flow is:
 
@@ -284,7 +284,7 @@ Database access should remain server-side.
 
 # 10. Dynamic Data Loading
 
-> **Implementation note (TASK-002):** "Question Patterns for Subtopic" below is not a UI-facing load in the current implementation, since Question Pattern is not user-selected. See `docs/project-management/requirements.md` §6.
+> **Implementation note (TASK-010):** "Question Patterns for Subtopic" below is now a real UI-facing load — the Setup screen fetches the available Question Patterns as soon as a Subtopic is selected. See `docs/tasks/TASK-010-self-evaluation-and-issue-fixes.md`.
 
 Educational values should be loaded dynamically.
 
@@ -314,7 +314,7 @@ The UI should not hard-code these values.
 
 # 11. Cascading Selection
 
-> **Implementation note (TASK-002):** The current UI's selection chain ends at Subtopic; Question Pattern is not a separate UI selection step. See `docs/project-management/requirements.md` §6.
+> **Implementation note (TASK-010):** The current UI's selection chain now extends through Question Pattern as a separate step, matching the chain below. See `docs/tasks/TASK-010-self-evaluation-and-issue-fixes.md`.
 
 The selection chain is:
 

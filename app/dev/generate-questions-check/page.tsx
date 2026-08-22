@@ -1,4 +1,4 @@
-import { getSubjectWithSubtopics } from "@/lib/db/education";
+import { getQuestionPatternsForSubtopic, getSubjectWithSubtopics } from "@/lib/db/education";
 import { getGenerationContext } from "@/lib/db/generation-context";
 import { generateQuestions } from "@/lib/generation/generate-questions";
 
@@ -16,11 +16,22 @@ export default async function GenerateQuestionsCheckPage() {
   }
 
   const subtopic = data.subtopics[0];
+  const patternsResult = await getQuestionPatternsForSubtopic(subtopic.id);
+  if (!patternsResult.ok) {
+    return (
+      <main className="p-8 font-mono text-sm">
+        <h1 className="text-lg font-bold mb-4">Generate Questions Check</h1>
+        <p>{patternsResult.error}</p>
+      </main>
+    );
+  }
+
   const contextResult = await getGenerationContext({
     subjectName: data.subject.name,
     subtopicId: subtopic.id,
     subtopicName: subtopic.name,
     difficulty: "medium",
+    patternIds: patternsResult.patterns.map((p) => p.id),
   });
 
   if (!contextResult.ok) {

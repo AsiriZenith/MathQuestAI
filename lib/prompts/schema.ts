@@ -6,6 +6,21 @@ const optionSchema = z.object({
   text: z.string().min(1),
 });
 
+/**
+ * Normalise an absent-ish value to `undefined` before validation.
+ *
+ * Zod's `.optional()` accepts `undefined` but rejects `null`, and models
+ * routinely emit `null` or `""` for a field they cannot confidently fill.
+ * Because `questions` is validated as a whole array, one such value would
+ * otherwise invalidate an entire batch of good questions.
+ */
+function emptyToUndefined(value: unknown): unknown {
+  if (value === null) return undefined;
+  if (typeof value === "string" && value.trim().length === 0) return undefined;
+  if (Array.isArray(value) && value.length === 0) return undefined;
+  return value;
+}
+
 const questionSchema = z
   .object({
     questionNumber: z.number().int().positive(),
@@ -17,7 +32,20 @@ const questionSchema = z
       "true_false",
       "multi_step",
     ]),
-    options: z.array(optionSchema).optional(),
+    // Optional by design: a missing pattern label must not discard an otherwise
+    // valid set of questions. The evaluation pipeline measures its absence instead
+    // (see lib/evaluation/dimensions/pattern-adherence.ts).
+    questionPattern: z.preprocess(
+      (value) => {
+        const normalised = emptyToUndefined(value);
+        return typeof normalised === "string" ? normalised.trim() : normalised;
+      },
+      z.string().optional(),
+    ),
+    // Same treatment: the prompt tells the model to omit `options` for
+    // non-multiple-choice questions, and a literal `null` there must not
+    // invalidate the batch. The multiple_choice case is enforced below.
+    options: z.preprocess(emptyToUndefined, z.array(optionSchema).optional()),
     correctAnswer: z.string().min(1),
     explanation: z.string().min(1),
   })
@@ -55,6 +83,15 @@ export function parseGenerationResponse(raw: string): ParsedGenerationResponse {
 
   const result = generationResponseSchema.safeParse(parsedJson);
   if (!result.success) {
+    // Log the offending field paths server-side so a schema mismatch is
+    // diagnosable; the returned message stays generic because provider
+    // internals must not reach the user (docs architecture §27).
+    console.error(
+      "parseGenerationResponse: schema validation failed -",
+      result.error.issues
+        .map((issue) => `${issue.path.join(".") || "(root)"}: ${issue.message}`)
+        .join(" | "),
+    );
     return { ok: false, error: "Response does not match the expected question schema." };
   }
 

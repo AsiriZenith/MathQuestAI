@@ -1,4 +1,4 @@
-import { getSubjectWithSubtopics } from "@/lib/db/education";
+import { getQuestionPatternsForSubtopic, getSubjectWithSubtopics } from "@/lib/db/education";
 import { getGenerationContext } from "@/lib/db/generation-context";
 import { buildPrompt } from "@/lib/prompts/builder";
 import type { AiQuestionType } from "@/lib/prompts/types";
@@ -50,11 +50,22 @@ export default async function PromptPreviewPage({
   const subtopic =
     data.subtopics.find((s) => s.id === requestedSubtopicId) ?? data.subtopics[0];
 
+  const patternsResult = await getQuestionPatternsForSubtopic(subtopic.id);
+  if (!patternsResult.ok) {
+    return (
+      <main className="p-8 font-mono text-sm">
+        <h1 className="text-lg font-bold mb-4">Prompt Preview</h1>
+        <p>{patternsResult.error}</p>
+      </main>
+    );
+  }
+
   const contextResult = await getGenerationContext({
     subjectName: data.subject.name,
     subtopicId: subtopic.id,
     subtopicName: subtopic.name,
     difficulty,
+    patternIds: patternsResult.patterns.map((p) => p.id),
   });
 
   if (!contextResult.ok) {

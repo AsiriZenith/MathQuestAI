@@ -10,7 +10,7 @@ import type { GenerationContext } from "@/lib/types";
 
 const CONTEXT: GenerationContext = {
   subjectName: "Mathematics",
-  subtopicName: "Simplify / Calculate",
+  subtopicName: "Simplify & Calculate",
   difficulty: "easy",
   patterns: [
     {

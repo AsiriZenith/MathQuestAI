@@ -136,7 +136,7 @@ Topic:
 Algebra
 
 Subtopic:
-Simplify / Calculate
+Simplify & Calculate
 
 Question Pattern:
 Combine Like Terms
@@ -157,7 +157,7 @@ Mathematics
 +
 Algebra
 +
-Simplify / Calculate
+Simplify & Calculate
 +
 Combine Like Terms
 +
@@ -985,7 +985,7 @@ Topic:
 Algebra
 
 Subtopic:
-Simplify / Calculate
+Simplify & Calculate
 
 Question Pattern:
 Combine Like Terms

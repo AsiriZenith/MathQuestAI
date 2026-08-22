@@ -6,7 +6,7 @@ import type { GenerationContext } from "@/lib/types";
 
 const CONTEXT: GenerationContext = {
   subjectName: "Mathematics",
-  subtopicName: "Simplify / Calculate",
+  subtopicName: "Simplify & Calculate",
   difficulty: "easy",
   patterns: [
     {
@@ -78,14 +78,14 @@ describe("generateQuestions", () => {
 
   it("fails safely at the provider stage when the provider fails, without returning fake questions", async () => {
     const provider = makeFakeProvider();
-    provider.generate.mockResolvedValue({ ok: false, error: "Unable to reach the Gemini API." });
+    provider.generate.mockResolvedValue({ ok: false, error: "Unable to reach the AI provider." });
 
     const result = await generateQuestions(CONTEXT, ["multiple_choice"], provider);
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.stage).toBe("provider");
-      expect(result.error).toBe("Unable to reach the Gemini API.");
+      expect(result.error).toBe("Unable to reach the AI provider.");
     }
   });
 
@@ -99,9 +99,9 @@ describe("generateQuestions", () => {
     if (!result.ok) expect(result.stage).toBe("validation");
   });
 
-  it("only depends on the AiProvider interface, not any concrete Gemini implementation", async () => {
-    // This test file never imports GeminiProvider or @google/genai — enforced by review/grep,
-    // asserted here structurally: the fake provider satisfies AiProvider with no SDK involved.
+  it("only depends on the AiProvider interface, not any concrete provider implementation", async () => {
+    // This test file never imports HttpAiProvider — enforced by review/grep, asserted here
+    // structurally: the fake provider satisfies AiProvider with no network involved.
     const provider = makeFakeProvider();
     provider.generate.mockResolvedValue({ ok: true, rawText: VALID_RESPONSE_JSON });
 

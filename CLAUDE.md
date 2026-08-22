@@ -134,8 +134,9 @@ Before implementing a feature, read the relevant documentation.
 - `docs/project-management/database.md` — database structure and relationships
 - `docs/project-management/ai-generation.md` — AI generation, context and prompt strategy
 - `docs/project-management/ui.md` — UI pages, routes and design decisions
-- `docs/development.md` — development workflow and TDD practices
 - `docs/project-management/progress.md` — current project progress and completed/in-progress work
+
+Development workflow and TDD practices are covered inline in §3 of this file and in `docs/tasks/tasks_README.md` — there is no separate `docs/development.md` (reviewed and confirmed unnecessary three times: TASK-003-I, a progress.md follow-up, and TASK-011; existing coverage is sufficient and a dedicated file would be redundant).
 
 If documentation conflicts with assumptions in the code, stop and identify the conflict rather than silently choosing an implementation.
 

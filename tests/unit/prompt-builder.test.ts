@@ -5,7 +5,7 @@ import type { PromptRequest } from "@/lib/prompts/types";
 
 const CONTEXT: GenerationContext = {
   subjectName: "Mathematics",
-  subtopicName: "Simplify / Calculate",
+  subtopicName: "Simplify & Calculate",
   difficulty: "hard",
   patterns: [
     {
@@ -53,7 +53,7 @@ describe("buildPrompt", () => {
   it("includes the subject and subtopic", () => {
     const prompt = buildPrompt(makeRequest());
     expect(prompt).toContain("Mathematics");
-    expect(prompt).toContain("Simplify / Calculate");
+    expect(prompt).toContain("Simplify & Calculate");
   });
 
   it("includes all selected question patterns without implying every one is mandatory per question", () => {

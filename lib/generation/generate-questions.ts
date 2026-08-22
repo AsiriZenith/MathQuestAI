@@ -3,19 +3,19 @@ import { z } from "zod";
 import { buildPrompt } from "@/lib/prompts/builder";
 import { generationResponseSchema, parseGenerationResponse } from "@/lib/prompts/schema";
 import { DEFAULT_QUESTION_COUNT } from "@/lib/ai/config";
-import { GeminiProvider } from "@/lib/ai/gemini-provider";
+import { HttpAiProvider } from "@/lib/ai/http-provider";
 import type { AiProvider } from "@/lib/ai/provider";
 import type { AiQuestionType, GenerationResponse } from "@/lib/prompts/types";
 import type { GenerationContext } from "@/lib/types";
 
 export type GenerateQuestionsResult =
-  | { ok: true; data: GenerationResponse }
+  | { ok: true; data: GenerationResponse; prompt: string; requestedQuestionCount: number }
   | { ok: false; stage: "prompt" | "provider" | "validation"; error: string };
 
 export async function generateQuestions(
   context: GenerationContext,
   questionTypes: AiQuestionType[] | "auto",
-  provider: AiProvider = new GeminiProvider(),
+  provider: AiProvider = new HttpAiProvider(),
 ): Promise<GenerateQuestionsResult> {
   if (context.patterns.length === 0) {
     console.error("generateQuestions: prompt stage failed - no question patterns in context");
@@ -45,5 +45,12 @@ export async function generateQuestions(
   }
 
   console.log("generateQuestions: generation succeeded");
-  return { ok: true, data: parsed.data };
+  // The prompt is returned, not discarded: it is the object of study for the
+  // evaluation pipeline, which traces each finding back to a prompt section.
+  return {
+    ok: true,
+    data: parsed.data,
+    prompt,
+    requestedQuestionCount: DEFAULT_QUESTION_COUNT,
+  };
 }

@@ -1,4 +1,8 @@
 import type { LucideIcon } from "lucide-react";
+import type { GenerationResponse } from "@/lib/prompts/types";
+// Type-only import: erased at compile time, so the mutual reference with
+// lib/evaluation/types.ts creates no runtime cycle.
+import type { EvaluationResult } from "@/lib/evaluation/types";
 
 export type Difficulty = "easy" | "medium" | "hard";
 
@@ -9,6 +13,8 @@ export interface PracticeConfig {
   difficulty: Difficulty;
   selectedTypes: string[];
   autoTypes: boolean;
+  selectedPatternIds: string[];
+  autoPatterns: boolean;
 }
 
 export interface SubjectRecord {
@@ -25,6 +31,15 @@ export interface SubtopicRecord {
   id: string;
   name: string;
 }
+
+export interface QuestionPatternOption {
+  id: string;
+  name: string;
+}
+
+export type QuestionPatternsResult =
+  | { ok: true; patterns: QuestionPatternOption[] }
+  | { ok: false; error: string };
 
 export interface SubjectWithSubtopics {
   subject: SubjectRecord;
@@ -55,6 +70,32 @@ export interface GenerationContext {
 
 export type GenerationContextResult =
   | { ok: true; context: GenerationContext }
+  | { ok: false; error: string };
+
+/**
+ * What a generation run was asked to do, preserved so the evaluation can hold
+ * the prompt accountable for its own output.
+ */
+export interface GenerationMeta {
+  prompt: string;
+  requestedQuestionCount: number;
+}
+
+export type EvaluationMethod = "predefined";
+
+export interface EvaluationData {
+  method: EvaluationMethod;
+  config: PracticeConfig;
+  generationContext: GenerationContext;
+  generationResponse: GenerationResponse;
+  /** The exact final prompt sent to the AI — the object of study for the evaluation. */
+  prompt: string;
+  requestedQuestionCount: number;
+  result: EvaluationResult;
+}
+
+export type EvaluationPrepResult =
+  | { ok: true; data: EvaluationData }
   | { ok: false; error: string };
 
 export type GeneratedTypeId = "direct" | "mc" | "word" | "missing" | "multistep";

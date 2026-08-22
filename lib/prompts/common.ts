@@ -37,6 +37,7 @@ export const OUTPUT_FORMAT_INSTRUCTIONS = `Return ONLY valid JSON using this exa
       "questionNumber": 1,
       "questionText": "...",
       "questionType": "multiple_choice",
+      "questionPattern": "...",
       "options": [
         { "id": "A", "text": "..." },
         { "id": "B", "text": "..." },
@@ -49,4 +50,6 @@ export const OUTPUT_FORMAT_INSTRUCTIONS = `Return ONLY valid JSON using this exa
   ]
 }
 
-The "options" field is required only when "questionType" is "multiple_choice". For other question types, omit "options" and provide "correctAnswer" as the expected answer text.`;
+The "options" field is required only when "questionType" is "multiple_choice". For other question types, omit "options" and provide "correctAnswer" as the expected answer text.
+
+The "questionPattern" field is required for every question. Set it to the exact name of the Question Pattern from the EDUCATIONAL CONTEXT section that the question implements. Copy the name exactly as written there.`;

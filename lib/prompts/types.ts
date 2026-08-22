@@ -16,6 +16,13 @@ export interface GeneratedQuestion {
   questionNumber: number;
   questionText: string;
   questionType: AiQuestionType;
+  /**
+   * The Question Pattern this question implements, as declared by the AI.
+   * Optional: a missing label must never fail an otherwise-valid generation —
+   * absence is instead measured as an instruction-adherence finding by the
+   * evaluation pipeline (lib/evaluation/dimensions/pattern-adherence.ts).
+   */
+  questionPattern?: string;
   options?: GeneratedQuestionOption[];
   correctAnswer: string;
   explanation: string;

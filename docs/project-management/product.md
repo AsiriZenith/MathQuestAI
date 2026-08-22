@@ -133,7 +133,7 @@ Topic:
 Algebra
 
 Subtopic:
-Simplify / Calculate
+Simplify & Calculate
 ```
 
 Subtopic selection is mandatory for the question-generation flow.
@@ -166,7 +166,7 @@ Example:
 
 ```text
 Subtopic:
-Simplify / Calculate
+Simplify & Calculate
 
 Selected Question Patterns:
 ✓ Combine Like Terms

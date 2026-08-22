@@ -15,7 +15,7 @@ describe("Database connection", () => {
 
   it("resolves the seeded Algebra Question Patterns via the Subtopic relation", async () => {
     const subtopic = await prisma.subtopic.findFirst({
-      where: { name: "Simplify / Calculate" },
+      where: { name: "Simplify & Calculate" },
       include: { questionPatterns: true },
     });
 

@@ -2,7 +2,12 @@
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import type { GenerationResponse } from "@/lib/prompts/types";
-import type { GenerationContext, PracticeConfig } from "@/lib/types";
+import type {
+  EvaluationData,
+  GenerationContext,
+  GenerationMeta,
+  PracticeConfig,
+} from "@/lib/types";
 
 interface PracticeSessionState {
   config: PracticeConfig | null;
@@ -11,6 +16,10 @@ interface PracticeSessionState {
   setGenerationResponse: (response: GenerationResponse) => void;
   generationContext: GenerationContext | null;
   setGenerationContext: (context: GenerationContext) => void;
+  generationMeta: GenerationMeta | null;
+  setGenerationMeta: (meta: GenerationMeta) => void;
+  evaluationData: EvaluationData | null;
+  setEvaluationData: (data: EvaluationData) => void;
 }
 
 const PracticeSessionContext = createContext<PracticeSessionState | null>(null);
@@ -20,11 +29,15 @@ export function PracticeSessionProvider({
   initialConfig = null,
   initialGenerationResponse = null,
   initialGenerationContext = null,
+  initialGenerationMeta = null,
+  initialEvaluationData = null,
 }: {
   children: ReactNode;
   initialConfig?: PracticeConfig | null;
   initialGenerationResponse?: GenerationResponse | null;
   initialGenerationContext?: GenerationContext | null;
+  initialGenerationMeta?: GenerationMeta | null;
+  initialEvaluationData?: EvaluationData | null;
 }) {
   const [config, setConfig] = useState<PracticeConfig | null>(initialConfig);
   const [generationResponse, setGenerationResponse] = useState<GenerationResponse | null>(
@@ -32,6 +45,12 @@ export function PracticeSessionProvider({
   );
   const [generationContext, setGenerationContext] = useState<GenerationContext | null>(
     initialGenerationContext,
+  );
+  const [generationMeta, setGenerationMeta] = useState<GenerationMeta | null>(
+    initialGenerationMeta,
+  );
+  const [evaluationData, setEvaluationData] = useState<EvaluationData | null>(
+    initialEvaluationData,
   );
 
   const value = useMemo(
@@ -42,8 +61,12 @@ export function PracticeSessionProvider({
       setGenerationResponse,
       generationContext,
       setGenerationContext,
+      generationMeta,
+      setGenerationMeta,
+      evaluationData,
+      setEvaluationData,
     }),
-    [config, generationResponse, generationContext],
+    [config, generationResponse, generationContext, generationMeta, evaluationData],
   );
 
   return (

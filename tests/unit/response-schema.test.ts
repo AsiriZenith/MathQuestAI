@@ -19,6 +19,73 @@ const VALID_MC_JSON = JSON.stringify({
   ],
 });
 
+function questionWith(overrides: Record<string, unknown>): string {
+  return JSON.stringify({
+    questions: [
+      {
+        questionNumber: 1,
+        questionText: "Simplify 3x + 5x.",
+        questionType: "fill_in_the_blank",
+        correctAnswer: "8x",
+        explanation: "3x and 5x are like terms, so their coefficients are added.",
+        ...overrides,
+      },
+    ],
+  });
+}
+
+describe("parseGenerationResponse — absent-ish optional fields", () => {
+  // Regression guard: `questionPattern` and `options` are optional, but Zod's
+  // `.optional()` rejects `null`, and models routinely emit `null`/"" for a
+  // field they cannot fill. Because questions are validated as a whole array,
+  // one such value used to invalidate an entire batch of good questions.
+  it.each([
+    ["null", null],
+    ["an empty string", ""],
+    ["whitespace only", "   "],
+  ])("accepts a questionPattern of %s, normalising it to undefined", (_label, value) => {
+    const result = parseGenerationResponse(questionWith({ questionPattern: value }));
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data.questions[0].questionPattern).toBeUndefined();
+    }
+  });
+
+  it("keeps and trims a real questionPattern value", () => {
+    const result = parseGenerationResponse(
+      questionWith({ questionPattern: "  Combine Like Terms  " }),
+    );
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data.questions[0].questionPattern).toBe("Combine Like Terms");
+    }
+  });
+
+  it("accepts a missing questionPattern entirely", () => {
+    const result = parseGenerationResponse(questionWith({}));
+    expect(result.ok).toBe(true);
+  });
+
+  it("accepts null options on a non-multiple-choice question", () => {
+    const result = parseGenerationResponse(questionWith({ options: null }));
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data.questions[0].options).toBeUndefined();
+    }
+  });
+
+  it("still rejects a multiple_choice question whose options are null", () => {
+    const result = parseGenerationResponse(
+      questionWith({ questionType: "multiple_choice", options: null, correctAnswer: "A" }),
+    );
+
+    expect(result.ok).toBe(false);
+  });
+});
+
 describe("parseGenerationResponse", () => {
   it("accepts a valid multiple_choice question", () => {
     const result = parseGenerationResponse(VALID_MC_JSON);

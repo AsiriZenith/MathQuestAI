@@ -7,10 +7,15 @@ export async function getGenerationContext(input: {
   subtopicId: string;
   subtopicName: string;
   difficulty: Difficulty;
+  patternIds: string[];
 }): Promise<GenerationContextResult> {
   try {
+    if (input.patternIds.length === 0) {
+      return { ok: false, error: "Select at least one question pattern." };
+    }
+
     const patterns = await prisma.questionPattern.findMany({
-      where: { subtopicId: input.subtopicId },
+      where: { id: { in: input.patternIds }, subtopicId: input.subtopicId },
       select: { id: true, name: true },
     });
 

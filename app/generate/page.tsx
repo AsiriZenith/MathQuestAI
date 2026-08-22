@@ -27,12 +27,15 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default function GeneratePage() {
   const router = useRouter();
-  const { config, generationContext, setGenerationResponse } = usePracticeSession();
+  const { config, generationContext, setGenerationResponse, setGenerationMeta } =
+    usePracticeSession();
   const [currentStep, setCurrentStep] = useState(1);
   const animationDone = currentStep > 4;
 
   const [result, setResult] = useState<
-    { ok: true; data: GenerationResponse } | { ok: false; error: string } | null
+    | { ok: true; data: GenerationResponse; prompt: string; requestedQuestionCount: number }
+    | { ok: false; error: string }
+    | null
   >(null);
   const requestedRef = useRef(false);
 
@@ -60,7 +63,12 @@ export default function GeneratePage() {
 
     generateQuestionsAction(generationContext, questionTypes).then((res) => {
       if (res.ok) {
-        setResult({ ok: true, data: res.data });
+        setResult({
+          ok: true,
+          data: res.data,
+          prompt: res.prompt,
+          requestedQuestionCount: res.requestedQuestionCount,
+        });
       } else {
         setResult({ ok: false, error: res.error });
       }
@@ -101,6 +109,11 @@ export default function GeneratePage() {
   const handleComplete = () => {
     if (!result || !result.ok) return;
     setGenerationResponse(result.data);
+    // Preserved so the evaluation can trace each finding back to a prompt section.
+    setGenerationMeta({
+      prompt: result.prompt,
+      requestedQuestionCount: result.requestedQuestionCount,
+    });
     router.push("/questions");
   };
 

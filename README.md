@@ -155,7 +155,7 @@ Subject:
 Mathematics
 
 Subtopic:
-Simplify / Calculate
+Simplify & Calculate
 
 Question Pattern:
 Combine Like Terms
@@ -328,15 +328,22 @@ It is interested in:
 
 > "Did the AI generate a good question given the supplied context?"
 
-The Evaluation page will eventually allow generated questions to be reviewed.
+The Evaluation page reports on **the prompt**, not the questions and not the AI model. Its measure of success is that after reading it, a researcher knows what to change in the prompt before the next run.
 
-Evaluation helps identify weaknesses in:
+Because the prompt is assembled from seven distinct sections, each one maps to a measurable dimension, and the overall score decomposes along the prompt's own structure:
 
-- Prompt design
-- Educational context
-- Reference questions
-- Difficulty guidance
-- Question pattern instructions
+| Prompt section | What is measured |
+|---|---|
+| Generation Requirement | Was the requested question count produced? |
+| Educational Context | Did questions stay within the listed question patterns? |
+| Difficulty | Does observed complexity match the requested band? |
+| Question Type | Did questions use only the requested types? |
+| Reference Questions | Were the examples learned from without being copied? |
+| Output Format | Did the output follow the required structure? |
+
+Every finding therefore points at a specific, editable block of prompt text. The page shows the real prompt section by section with a verdict on each, per-question evidence for every deviation, and concrete replacement text for each recommendation.
+
+The evaluation is **fully deterministic** — no second AI call is involved. This keeps the measurement reproducible, so a change in score between runs is attributable to the prompt rather than to a judge model's variance. Where something cannot be measured exactly (difficulty, reference alignment) it is labelled a proxy, shown with its raw signals, and never presented as semantic truth.
 
 Generation and evaluation are intentionally separate concerns.
 
@@ -744,21 +751,23 @@ Use the project's environment configuration conventions and ensure local environ
 
 ## 25. Local AI Configuration
 
-MathQuestAI uses Google Gemini for AI-powered question generation.
+MathQuestAI talks to any **OpenAI-compatible** AI provider (Groq, Gemini's OpenAI-compatible endpoint, OpenAI itself, or any other provider exposing the same `chat/completions` API shape). Switching providers is a `.env.local` change only — no source file edits are needed.
 
-### 1. Get a Gemini API key
+### 1. Get an API key
 
-Create an API key using Google AI Studio:
-
-https://aistudio.google.com/
+Today's setup uses [Groq](https://console.groq.com/) — create an API key there. Any other OpenAI-compatible provider's key works the same way, just with a different `AI_BASE_URL`/`AI_MODEL`.
 
 ### 2. Configure the local environment
 
 Create `.env.local` in the project root and add:
 
 ```env
-MATHQUESTAI_GEMINI_API_KEY_V1=your-api-key-here
+AI_API_KEY=your-api-key-here
+AI_MODEL=openai/gpt-oss-120b
+AI_BASE_URL=https://api.groq.com/openai/v1
 ```
+
+`AI_MODEL` and `AI_BASE_URL` are optional — they default to Groq's model/endpoint if omitted. Set them explicitly to point at a different OpenAI-compatible provider.
 
 Never commit `.env.local` or expose the API key publicly.
 

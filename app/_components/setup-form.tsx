@@ -1,16 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { motion } from "motion/react";
 import { canGenerate } from "@/lib/mock-data";
-import { loadGenerationContextAction } from "@/lib/actions/setup";
+import { loadGenerationContextAction, loadQuestionPatternsAction } from "@/lib/actions/setup";
 import { usePracticeSession } from "@/components/providers/practice-session-provider";
 import { FixedField } from "@/app/_components/fixed-field";
 import { DifficultyToggle } from "@/app/_components/difficulty-toggle";
 import { QuestionTypeChips } from "@/app/_components/question-type-chips";
-import type { Difficulty, SubjectRecord, SubtopicRecord, TopicRecord } from "@/lib/types";
+import { QuestionPatternChips } from "@/app/_components/question-pattern-chips";
+import type {
+  Difficulty,
+  QuestionPatternsResult,
+  SubjectRecord,
+  SubtopicRecord,
+  TopicRecord,
+} from "@/lib/types";
 
 export function SetupForm({
   subject,
@@ -31,6 +38,59 @@ export function SetupForm({
   const [autoTypes, setAutoTypes] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [selectedPatternIds, setSelectedPatternIds] = useState<Set<string>>(new Set());
+  const [autoPatterns, setAutoPatterns] = useState(false);
+  const [patternsResultBySubtopic, setPatternsResultBySubtopic] = useState<{
+    subtopicId: string;
+    result: QuestionPatternsResult;
+  } | null>(null);
+
+  const [selectionSubtopicId, setSelectionSubtopicId] = useState(subtopicId);
+  if (subtopicId !== selectionSubtopicId) {
+    setSelectionSubtopicId(subtopicId);
+    setSelectedPatternIds(new Set());
+    setAutoPatterns(false);
+  }
+
+  useEffect(() => {
+    if (!subtopicId) return;
+    let cancelled = false;
+
+    loadQuestionPatternsAction(subtopicId).then((result) => {
+      if (!cancelled) setPatternsResultBySubtopic({ subtopicId, result });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [subtopicId]);
+
+  const currentPatternsResult =
+    patternsResultBySubtopic?.subtopicId === subtopicId ? patternsResultBySubtopic.result : null;
+  const patterns = currentPatternsResult?.ok ? currentPatternsResult.patterns : null;
+  const patternsError =
+    currentPatternsResult && !currentPatternsResult.ok ? currentPatternsResult.error : null;
+  const patternsLoading = subtopicId !== "" && currentPatternsResult === null;
+
+  const togglePattern = (id: string) => {
+    if (autoPatterns) setAutoPatterns(false);
+    setSelectedPatternIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAutoPatterns = () => {
+    if (!autoPatterns) {
+      setSelectedPatternIds(new Set());
+      setAutoPatterns(true);
+    } else {
+      setAutoPatterns(false);
+    }
+  };
 
   const toggleType = (id: string) => {
     if (autoTypes) setAutoTypes(false);
@@ -57,12 +117,16 @@ export function SetupForm({
     difficulty,
     selectedTypesSize: selectedTypes.size,
     autoTypes,
+    selectedPatternsSize: selectedPatternIds.size,
+    autoPatterns,
   });
 
   const handleGenerate = async () => {
     if (!ready || isLoading) return;
     const selectedSubtopic = subtopics.find((s) => s.id === subtopicId);
-    if (!selectedSubtopic) return;
+    if (!selectedSubtopic || !patterns) return;
+
+    const patternIds = autoPatterns ? patterns.map((p) => p.id) : Array.from(selectedPatternIds);
 
     setError(null);
     setIsLoading(true);
@@ -72,6 +136,7 @@ export function SetupForm({
       subtopicId: selectedSubtopic.id,
       subtopicName: selectedSubtopic.name,
       difficulty: difficulty as Difficulty,
+      patternIds,
     });
 
     setIsLoading(false);
@@ -89,6 +154,8 @@ export function SetupForm({
       difficulty: difficulty as Difficulty,
       selectedTypes: Array.from(selectedTypes),
       autoTypes,
+      selectedPatternIds: patternIds,
+      autoPatterns,
     });
     router.push("/generate");
   };
@@ -143,6 +210,44 @@ export function SetupForm({
               </select>
               <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             </div>
+          </div>
+
+          <div className="border-t border-border" />
+
+          <div>
+            <label className="font-jakarta block text-sm font-semibold text-foreground mb-1">
+              Question Patterns
+            </label>
+            <p className="text-xs text-muted-foreground mb-3">
+              Which types of tasks within this subtopic should be included?
+            </p>
+            {!subtopicId && (
+              <p className="text-sm text-muted-foreground">
+                Select a subtopic to see the available question patterns.
+              </p>
+            )}
+            {subtopicId && patternsLoading && (
+              <p className="text-sm text-muted-foreground">Loading question patterns…</p>
+            )}
+            {subtopicId && !patternsLoading && patternsError && (
+              <p className="text-sm text-destructive" role="alert">
+                {patternsError}
+              </p>
+            )}
+            {subtopicId && !patternsLoading && !patternsError && patterns?.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No question patterns are available for this subtopic.
+              </p>
+            )}
+            {subtopicId && !patternsLoading && !patternsError && patterns && patterns.length > 0 && (
+              <QuestionPatternChips
+                patterns={patterns}
+                selectedPatternIds={selectedPatternIds}
+                autoPatterns={autoPatterns}
+                onTogglePattern={togglePattern}
+                onToggleAuto={toggleAutoPatterns}
+              />
+            )}
           </div>
 
           <div className="border-t border-border" />

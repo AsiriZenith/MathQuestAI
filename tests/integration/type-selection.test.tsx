@@ -14,7 +14,7 @@ vi.mock("@/lib/actions/setup", () => ({
 
 const SUBJECT = { id: "subject-1", name: "Mathematics" };
 const TOPIC = { id: "topic-1", name: "Algebra" };
-const SUBTOPICS = [{ id: "subtopic-1", name: "Simplify / Calculate" }];
+const SUBTOPICS = [{ id: "subtopic-1", name: "Simplify & Calculate" }];
 
 function renderSetupForm() {
   return renderWithSession(<SetupForm subject={SUBJECT} topic={TOPIC} subtopics={SUBTOPICS} />);

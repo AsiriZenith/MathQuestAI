@@ -33,7 +33,7 @@ function buildEducationalContextSection(request: PromptRequest): string {
     })
     .join("\n");
 
-  return `EDUCATIONAL CONTEXT\n-------------------\nSubject: ${context.subjectName}\nSubtopic: ${context.subtopicName}\n\nQuestion Patterns:\n${patternLines}\n\nThe listed Question Patterns are the allowed generation context. Not every question needs to use every pattern.`;
+  return `EDUCATIONAL CONTEXT\n-------------------\nSubject: ${context.subjectName}\nSubtopic: ${context.subtopicName}\n\nQuestion Patterns:\n${patternLines}\n\nThe listed Question Patterns are the allowed generation context. Not every question needs to use every pattern.\n\nLabel every generated question with the exact Question Pattern name it implements, using the "questionPattern" field described in the OUTPUT FORMAT section.`;
 }
 
 function buildDifficultySection(request: PromptRequest): string {
