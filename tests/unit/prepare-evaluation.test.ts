@@ -33,8 +33,8 @@ const RESPONSE: GenerationResponse = {
     {
       questionNumber: 1,
       questionText: "Simplify 3x + 5x.",
-      questionType: "multiple_choice",
-      questionPattern: "Combine Like Terms",
+      questionType: "mc",
+      questionPatternId: "pattern-a",
       options: [
         { id: "A", text: "8x" },
         { id: "B", text: "5x" },
@@ -47,7 +47,7 @@ const RESPONSE: GenerationResponse = {
 
 const PROMPT = [
   "GENERATION REQUIREMENT\n----------------------\nGenerate 1 questions.",
-  'EDUCATIONAL CONTEXT\n-------------------\nQuestion Patterns:\n- Combine Like Terms\n\nLabel every generated question using the "questionPattern" field.',
+  'EDUCATIONAL CONTEXT\n-------------------\nSELECTED QUESTION PATTERNS\n\n1.\n   ID: pattern-a\n   Name: Combine Like Terms\n\nSet the "questionPatternId" field to the exact ID shown above.',
   "OUTPUT FORMAT\n-------------\nReturn ONLY valid JSON.",
 ].join("\n\n");
 
@@ -58,6 +58,7 @@ const INPUT = {
   generationResponse: RESPONSE,
   prompt: PROMPT,
   requestedQuestionCount: 1,
+  generationContextId: "ctx-1",
 };
 
 describe("prepareEvaluation", () => {
@@ -74,6 +75,15 @@ describe("prepareEvaluation", () => {
     expect(result.data.prompt).toBe(PROMPT);
     expect(result.data.result.promptEffectiveness).toBeGreaterThan(0);
     expect(result.data.result.dimensions.length).toBeGreaterThan(0);
+    expect(result.data.generationContextId).toBe("ctx-1");
+  });
+
+  it("carries a null generationContextId through when the current generation hasn't been saved", async () => {
+    const result = await prepareEvaluation({ ...INPUT, generationContextId: null });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.generationContextId).toBeNull();
   });
 
   it("returns a safe error when there are no generated questions to evaluate", async () => {

@@ -43,7 +43,7 @@ export default async function GenerateQuestionsCheckPage() {
     );
   }
 
-  const result = await generateQuestions(contextResult.context, ["multiple_choice"]);
+  const result = await generateQuestions(contextResult.context, ["mc"]);
 
   return (
     <main className="p-8 font-mono text-sm space-y-6">

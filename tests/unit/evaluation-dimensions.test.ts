@@ -13,8 +13,8 @@ function question(overrides: Partial<GeneratedQuestion> = {}): GeneratedQuestion
   return {
     questionNumber: 1,
     questionText: "Simplify 3x + 5x.",
-    questionType: "multiple_choice",
-    questionPattern: "Combine Like Terms",
+    questionType: "mc",
+    questionPatternId: "pat-clt",
     options: [
       { id: "A", text: "8x" },
       { id: "B", text: "5x" },
@@ -49,12 +49,10 @@ describe("type adherence", () => {
   it("flags a question whose type was never requested", () => {
     const response = responseOf([
       question({ questionNumber: 1 }),
-      question({ questionNumber: 2, questionType: "word_problem", options: undefined }),
+      question({ questionNumber: 2, questionType: "wp", options: undefined }),
     ]);
 
-    const { dimension, deviations, coverage } = evaluateTypeAdherence(response, [
-      "multiple_choice",
-    ]);
+    const { dimension, deviations, coverage } = evaluateTypeAdherence(response, ["mc"]);
 
     expect(dimension.score).toBe(0.5);
     expect(deviations).toHaveLength(1);
@@ -73,10 +71,7 @@ describe("type adherence", () => {
 
   it("reports a missing requested type without scoring it as a failure", () => {
     const response = responseOf([question()]);
-    const { dimension, coverage } = evaluateTypeAdherence(response, [
-      "multiple_choice",
-      "word_problem",
-    ]);
+    const { dimension, coverage } = evaluateTypeAdherence(response, ["mc", "wp"]);
 
     expect(dimension.score).toBe(1);
     expect(dimension.status).toBe("met");
@@ -86,9 +81,12 @@ describe("type adherence", () => {
 });
 
 describe("pattern adherence", () => {
-  const patterns = ["Combine Like Terms", "Apply Distributive Property"];
+  const patterns = [
+    { id: "pat-clt", name: "Combine Like Terms" },
+    { id: "pat-dist", name: "Apply Distributive Property" },
+  ];
 
-  it("scores fully when every question is labelled and in scope", () => {
+  it("scores fully when every question carries a selected pattern id", () => {
     const response = responseOf([question(), question({ questionNumber: 2 })]);
     const { dimension } = evaluatePatternAdherence(response, patterns, true);
 
@@ -96,10 +94,10 @@ describe("pattern adherence", () => {
     expect(dimension.status).toBe("met");
   });
 
-  it("penalises unlabelled questions and records them as deviations", () => {
+  it("penalises questions with no pattern id and records them as deviations", () => {
     const response = responseOf([
       question(),
-      question({ questionNumber: 2, questionPattern: undefined }),
+      question({ questionNumber: 2, questionPatternId: "" }),
     ]);
     const { dimension, coverage, deviations } = evaluatePatternAdherence(response, patterns, true);
 
@@ -108,16 +106,16 @@ describe("pattern adherence", () => {
     expect(deviations.some((d) => d.kind === "missing_pattern_label")).toBe(true);
   });
 
-  it("flags a pattern the prompt never listed", () => {
-    const response = responseOf([question({ questionPattern: "Solve Quadratics" })]);
+  it("flags a pattern id that was not selected", () => {
+    const response = responseOf([question({ questionPatternId: "pat-quad" })]);
     const { coverage, deviations } = evaluatePatternAdherence(response, patterns, true);
 
-    expect(coverage.unexpected).toContain("Solve Quadratics");
+    expect(coverage.unexpected).toContain("pat-quad");
     expect(deviations[0].kind).toBe("out_of_scope_pattern");
   });
 
-  it("reports not_applicable for runs generated before labels were requested", () => {
-    const response = responseOf([question({ questionPattern: undefined })]);
+  it("reports not_applicable for runs generated before pattern ids were requested", () => {
+    const response = responseOf([question({ questionPatternId: "" })]);
     const { dimension } = evaluatePatternAdherence(response, patterns, false);
 
     expect(dimension.status).toBe("not_applicable");
@@ -136,7 +134,7 @@ describe("output integrity", () => {
   });
 
   it("detects options attached to a non-multiple-choice question", () => {
-    const response = responseOf([question({ questionType: "true_false" })]);
+    const response = responseOf([question({ questionType: "tf" })]);
     const result = evaluateOutputIntegrity(response);
 
     expect(result.checks.find((c) => c.id === "no_stray_options")?.passed).toBe(false);

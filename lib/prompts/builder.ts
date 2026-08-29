@@ -1,10 +1,9 @@
 import {
-  ALL_AI_QUESTION_TYPES,
   COMMON_INSTRUCTIONS,
   DIFFICULTY_GUIDANCE,
   OUTPUT_FORMAT_INSTRUCTIONS,
-  questionTypeLabel,
 } from "@/lib/prompts/common";
+import { QUESTION_TYPE_CODES, questionTypeLabel } from "@/lib/types";
 import type { PromptRequest } from "@/lib/prompts/types";
 
 function capitalize(value: string): string {
@@ -12,28 +11,32 @@ function capitalize(value: string): string {
 }
 
 function buildQuestionTypeSection(request: PromptRequest): string {
-  if (request.questionTypes === "auto") {
-    const labels = ALL_AI_QUESTION_TYPES.map((t) => t.label).join(", ");
-    return `QUESTION TYPE\n-------------\nGenerate a varied mix drawn from the following types: ${labels}.`;
-  }
+  const codes =
+    request.questionTypes === "auto" ? [...QUESTION_TYPE_CODES] : request.questionTypes;
 
-  const labels = request.questionTypes.map(questionTypeLabel).join(", ");
-  return `QUESTION TYPE\n-------------\n${labels}\n\nEach generated question should use one of the listed types. Not every type needs to appear in every question.`;
+  const list = codes.map((code) => `- ID: ${code}\n  Name: ${questionTypeLabel(code)}`).join("\n");
+
+  const instruction =
+    request.questionTypes === "auto"
+      ? 'Generate a varied mix drawn from the question types above. Set each question\'s "questionType" field to the ID (e.g. "mc") of the type it uses.'
+      : 'Each question must use exactly one of the question types above. Set the "questionType" field to that type\'s ID (e.g. "mc"). Do not use a type that is not listed, and do not invent a new one. Not every type needs to appear in every question.';
+
+  return `QUESTION TYPE\n-------------\nSELECTED QUESTION TYPES\n\n${list}\n\n${instruction}`;
 }
 
 function buildEducationalContextSection(request: PromptRequest): string {
   const { context } = request;
-  const patternLines = context.patterns
-    .map((pattern) => {
-      const lines = [`- ${pattern.name}`];
+  const patternBlocks = context.patterns
+    .map((pattern, index) => {
+      const lines = [`${index + 1}.`, `   ID: ${pattern.id}`, `   Name: ${pattern.name}`];
       if (pattern.generationPrompt) {
-        lines.push(`  Generation guidance: ${pattern.generationPrompt}`);
+        lines.push(`   Details: ${pattern.generationPrompt}`);
       }
       return lines.join("\n");
     })
-    .join("\n");
+    .join("\n\n");
 
-  return `EDUCATIONAL CONTEXT\n-------------------\nSubject: ${context.subjectName}\nSubtopic: ${context.subtopicName}\n\nQuestion Patterns:\n${patternLines}\n\nThe listed Question Patterns are the allowed generation context. Not every question needs to use every pattern.\n\nLabel every generated question with the exact Question Pattern name it implements, using the "questionPattern" field described in the OUTPUT FORMAT section.`;
+  return `EDUCATIONAL CONTEXT\n-------------------\nSubject: ${context.subjectName}\nSubtopic: ${context.subtopicName}\n\nSELECTED QUESTION PATTERNS\n\n${patternBlocks}\n\nThe listed Question Patterns are the allowed generation context. Not every question needs to use every pattern.\n\nFor every generated question, set the "questionPatternId" field to the exact ID (shown above) of the Question Pattern the question implements. Use the ID exactly as written; never invent or modify it, and never return the pattern name instead of the ID.`;
 }
 
 function buildDifficultySection(request: PromptRequest): string {

@@ -4,15 +4,16 @@ import {
   PenLine,
   CheckCircle2,
 } from "lucide-react";
-import type { Difficulty, LoadingStep } from "@/lib/types";
+import {
+  QUESTION_TYPE_CODES,
+  QUESTION_TYPE_LABELS,
+  type Difficulty,
+  type LoadingStep,
+  type QuestionType,
+} from "@/lib/types";
 
-export const QUESTION_TYPE_OPTIONS = [
-  { id: "mc", label: "Multiple Choice" },
-  { id: "fib", label: "Fill in the Blank" },
-  { id: "wp", label: "Word Problem" },
-  { id: "tf", label: "True / False" },
-  { id: "ms", label: "Multi-step Problem" },
-];
+export const QUESTION_TYPE_OPTIONS: { id: QuestionType; label: string }[] =
+  QUESTION_TYPE_CODES.map((id) => ({ id, label: QUESTION_TYPE_LABELS[id] }));
 
 export const DIFFICULTY_OPTIONS: {
   id: Difficulty;

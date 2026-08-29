@@ -18,6 +18,12 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace }),
 }));
 
+const updateGenerationContextScoreAction = vi.fn();
+vi.mock("@/lib/actions/evaluation", () => ({
+  updateGenerationContextScoreAction: (...args: unknown[]) =>
+    updateGenerationContextScoreAction(...args),
+}));
+
 const RESULT = evaluateGeneration({
   config: TEST_CONFIG,
   generationContext: TEST_GENERATION_CONTEXT,
@@ -34,12 +40,15 @@ const EVALUATION_DATA: EvaluationData = {
   prompt: TEST_GENERATION_META.prompt,
   requestedQuestionCount: TEST_GENERATION_META.requestedQuestionCount,
   result: RESULT,
+  generationContextId: "ctx-1",
 };
 
 describe("Evaluation screen", () => {
   beforeEach(() => {
     replace.mockClear();
     push.mockClear();
+    updateGenerationContextScoreAction.mockReset();
+    updateGenerationContextScoreAction.mockResolvedValue({ ok: true });
   });
 
   it("redirects home when no evaluation has been prepared", async () => {
@@ -93,5 +102,46 @@ describe("Evaluation screen", () => {
 
     await user.click(screen.getByRole("button", { name: /generate another set/i }));
     expect(push).toHaveBeenCalledWith("/generate");
+  });
+
+  describe("Score persistence (TASK-022)", () => {
+    it("persists the final score against the correct GenerationContextId", async () => {
+      renderWithSession(<EvaluationPage />, { evaluationData: EVALUATION_DATA });
+
+      await vi.waitFor(() =>
+        expect(updateGenerationContextScoreAction).toHaveBeenCalledWith({
+          generationContextId: "ctx-1",
+          score: RESULT.promptEffectiveness,
+        }),
+      );
+      expect(updateGenerationContextScoreAction).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not persist a score when the current generation has not been saved", async () => {
+      renderWithSession(<EvaluationPage />, {
+        evaluationData: { ...EVALUATION_DATA, generationContextId: null },
+      });
+
+      await new Promise((r) => setTimeout(r, 0));
+      expect(updateGenerationContextScoreAction).not.toHaveBeenCalled();
+    });
+
+    it("shows a non-blocking notice when the score fails to save, without hiding the report", async () => {
+      updateGenerationContextScoreAction.mockResolvedValue({
+        ok: false,
+        error: "internal detail: postgres",
+      });
+      renderWithSession(<EvaluationPage />, { evaluationData: EVALUATION_DATA });
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(/couldn't save this generation's score/i);
+      expect(screen.getAllByText(`${RESULT.promptEffectiveness}%`).length).toBeGreaterThan(0);
+    });
+
+    it("shows nothing extra when the score saves successfully", async () => {
+      renderWithSession(<EvaluationPage />, { evaluationData: EVALUATION_DATA });
+
+      await vi.waitFor(() => expect(updateGenerationContextScoreAction).toHaveBeenCalled());
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
   });
 });

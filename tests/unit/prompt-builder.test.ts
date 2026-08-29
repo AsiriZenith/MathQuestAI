@@ -33,7 +33,7 @@ const CONTEXT: GenerationContext = {
 function makeRequest(overrides: Partial<PromptRequest> = {}): PromptRequest {
   return {
     context: CONTEXT,
-    questionTypes: ["multiple_choice"],
+    questionTypes: ["mc"],
     questionCount: 5,
     ...overrides,
   };
@@ -56,11 +56,32 @@ describe("buildPrompt", () => {
     expect(prompt).toContain("Simplify & Calculate");
   });
 
-  it("includes all selected question patterns without implying every one is mandatory per question", () => {
+  it("includes all selected question patterns with both id and name, without implying every one is mandatory per question", () => {
     const prompt = buildPrompt(makeRequest());
     expect(prompt).toContain("Combine Like Terms");
     expect(prompt).toContain("Apply Distributive Property");
+    expect(prompt).toContain("pattern-a");
+    expect(prompt).toContain("pattern-b");
     expect(prompt).not.toMatch(/every question must (use|include) all/i);
+  });
+
+  it("does not include a pattern that was not selected", () => {
+    const prompt = buildPrompt(makeRequest());
+    expect(prompt).not.toContain("Factorise Quadratics");
+  });
+
+  it("instructs the AI to return the exact questionPatternId, not the name", () => {
+    const prompt = buildPrompt(makeRequest());
+    expect(prompt).toMatch(/questionPatternId/);
+    expect(prompt).toMatch(/exact ID/i);
+  });
+
+  it("lists selected question types with their id and name", () => {
+    const prompt = buildPrompt(makeRequest({ questionTypes: ["mc", "fib"] }));
+    expect(prompt).toMatch(/ID: mc/);
+    expect(prompt).toMatch(/Name: Multiple Choice/);
+    expect(prompt).toMatch(/ID: fib/);
+    expect(prompt).not.toMatch(/ID: wp/);
   });
 
   it("includes the difficulty guidance matching the selected level", () => {
@@ -79,14 +100,12 @@ describe("buildPrompt", () => {
   });
 
   it("explicitly includes a single selected question type", () => {
-    const prompt = buildPrompt(makeRequest({ questionTypes: ["multiple_choice"] }));
+    const prompt = buildPrompt(makeRequest({ questionTypes: ["mc"] }));
     expect(prompt).toMatch(/Multiple Choice/);
   });
 
   it("explicitly includes multiple selected question types", () => {
-    const prompt = buildPrompt(
-      makeRequest({ questionTypes: ["multiple_choice", "word_problem"] }),
-    );
+    const prompt = buildPrompt(makeRequest({ questionTypes: ["mc", "wp"] }));
     expect(prompt).toMatch(/Multiple Choice/);
     expect(prompt).toMatch(/Word Problem/);
   });

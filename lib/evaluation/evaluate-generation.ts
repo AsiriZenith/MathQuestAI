@@ -1,4 +1,3 @@
-import { QUESTION_TYPE_ID_MAP, questionTypeLabel } from "@/lib/prompts/common";
 import { evaluateCountAdherence } from "@/lib/evaluation/dimensions/count-adherence";
 import { evaluateOutputIntegrity } from "@/lib/evaluation/dimensions/output-integrity";
 import { evaluateTypeAdherence } from "@/lib/evaluation/dimensions/type-adherence";
@@ -6,9 +5,15 @@ import { evaluatePatternAdherence } from "@/lib/evaluation/dimensions/pattern-ad
 import { evaluateDifficultyAlignment } from "@/lib/evaluation/dimensions/difficulty-proxy";
 import { evaluateReferenceAlignment } from "@/lib/evaluation/dimensions/reference-alignment";
 import { deriveImprovements, deriveStrengths } from "@/lib/evaluation/improvements";
-import { PROMPT_SECTIONS, promptRequestsPatternLabels, splitPromptSections } from "@/lib/evaluation/prompt-sections";
-import type { AiQuestionType, GenerationResponse } from "@/lib/prompts/types";
-import type { GenerationContext, PracticeConfig } from "@/lib/types";
+import { PROMPT_SECTIONS, promptRequestsPatternIds, splitPromptSections } from "@/lib/evaluation/prompt-sections";
+import { isQuestionType } from "@/lib/persistence/validation";
+import type { GenerationResponse } from "@/lib/prompts/types";
+import {
+  questionTypeLabel,
+  type GenerationContext,
+  type PracticeConfig,
+  type QuestionType,
+} from "@/lib/types";
 import type {
   AdherenceStatus,
   DimensionScore,
@@ -34,11 +39,9 @@ function explain(score: number, effectivenessBand: EffectivenessBand): string {
   return `${preamble} only some of the requirements defined by the current prompt. The dimensions below show where the prompt's intent did not carry through. This is an experimental measurement, not an absolute measure of question quality.`;
 }
 
-function resolveRequestedTypes(config: PracticeConfig): AiQuestionType[] | "auto" {
+function resolveRequestedTypes(config: PracticeConfig): QuestionType[] | "auto" {
   if (config.autoTypes) return "auto";
-  return config.selectedTypes
-    .map((id) => QUESTION_TYPE_ID_MAP[id]?.id)
-    .filter((id): id is AiQuestionType => Boolean(id));
+  return config.selectedTypes.filter(isQuestionType);
 }
 
 /**
@@ -85,7 +88,8 @@ export function evaluateGeneration(input: {
 }): EvaluationResult {
   const { config, generationContext, generationResponse, prompt, requestedQuestionCount } = input;
 
-  const requestedPatterns = generationContext.patterns.map((p) => p.name);
+  const selectedPatterns = generationContext.patterns.map((p) => ({ id: p.id, name: p.name }));
+  const requestedPatterns = selectedPatterns.map((p) => p.name);
   const requestedTypes = resolveRequestedTypes(config);
 
   const count = evaluateCountAdherence(generationResponse, requestedQuestionCount);
@@ -93,8 +97,8 @@ export function evaluateGeneration(input: {
   const type = evaluateTypeAdherence(generationResponse, requestedTypes);
   const pattern = evaluatePatternAdherence(
     generationResponse,
-    requestedPatterns,
-    promptRequestsPatternLabels(prompt),
+    selectedPatterns,
+    promptRequestsPatternIds(prompt),
   );
   const difficulty = evaluateDifficultyAlignment(generationResponse, generationContext.difficulty);
   const reference = evaluateReferenceAlignment(generationResponse, generationContext);

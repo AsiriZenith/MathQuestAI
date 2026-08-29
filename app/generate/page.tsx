@@ -16,12 +16,12 @@ import {
 import Link from "next/link";
 import { motion } from "motion/react";
 import { LOADING_STEPS, QUESTION_TYPE_OPTIONS } from "@/lib/mock-data";
-import { QUESTION_TYPE_ID_MAP } from "@/lib/prompts/common";
 import { generateQuestionsAction } from "@/lib/actions/generation";
-import type { AiQuestionType, GenerationResponse } from "@/lib/prompts/types";
+import type { GenerationResponse } from "@/lib/prompts/types";
 import { usePracticeSession } from "@/components/providers/practice-session-provider";
 import { SessionSummaryCard } from "./_components/session-summary-card";
-import type { SummaryItem } from "@/lib/types";
+import { isQuestionType } from "@/lib/persistence/validation";
+import type { QuestionType, SummaryItem } from "@/lib/types";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -55,11 +55,9 @@ export default function GeneratePage() {
     if (!config || !generationContext || requestedRef.current) return;
     requestedRef.current = true;
 
-    const questionTypes: AiQuestionType[] | "auto" = config.autoTypes
+    const questionTypes: QuestionType[] | "auto" = config.autoTypes
       ? "auto"
-      : config.selectedTypes
-          .map((id) => QUESTION_TYPE_ID_MAP[id]?.id)
-          .filter((id): id is AiQuestionType => Boolean(id));
+      : config.selectedTypes.filter(isQuestionType);
 
     generateQuestionsAction(generationContext, questionTypes).then((res) => {
       if (res.ok) {

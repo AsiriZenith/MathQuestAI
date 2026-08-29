@@ -39,7 +39,7 @@ describe("GeneratePage — real generation", () => {
     expect(generateQuestionsActionMock).toHaveBeenCalledTimes(1);
     expect(generateQuestionsActionMock).toHaveBeenCalledWith(
       TEST_GENERATION_CONTEXT,
-      ["multiple_choice"],
+      ["mc"],
     );
   });
 

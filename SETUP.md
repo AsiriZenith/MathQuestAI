@@ -397,6 +397,15 @@ Simplify Multi-Operation Expressions
 If the tables exist but the counts are all `0`, the database was created but the
 backup never restored into it. Redo Step 3.3.
 
+> **Generation-persistence tables (TASK-016).** The database also has four tables
+> for persisting generation runs — `generation_contexts`,
+> `generation_context_question_types`, `generation_context_question_patterns`,
+> `generated_questions` — created by a separate hand-written SQL script, not by the
+> educational-data backup. They start empty and nothing writes to them yet
+> (the persistence workflow is a later task). If your restore predates that script
+> and these tables are missing, ask the project owner for the DDL. Schema in
+> `docs/project-management/database.md` §35.
+
 ---
 
 ## Step 4 — Configure environment variables
@@ -414,7 +423,7 @@ cp .env.example .env.local
 > runner, and you will get confusing "database not found" errors while everything
 > *looks* configured. `.env.local` is gitignored, so your credentials stay local.
 
-Open `.env.local` and fill it in. There are only four variables in the entire project:
+Open `.env.local` and fill it in. There are only a handful of variables in the entire project:
 
 ```env
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/MathQuestAI?schema=public"
@@ -422,6 +431,7 @@ DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/MathQuestAI?sch
 AI_API_KEY=your-api-key-here
 AI_MODEL=openai/gpt-oss-120b
 AI_BASE_URL=https://api.groq.com/openai/v1
+AI_PROVIDER=groq
 ```
 
 | Variable | Required | Purpose |
@@ -430,6 +440,7 @@ AI_BASE_URL=https://api.groq.com/openai/v1
 | `AI_API_KEY` | **Yes** (for generation) | API key for your AI provider. |
 | `AI_MODEL` | No | Defaults to `openai/gpt-oss-120b`. |
 | `AI_BASE_URL` | No | Defaults to `https://api.groq.com/openai/v1`. |
+| `AI_PROVIDER` | No | Short provider label saved on each generation record. Defaults to `groq`. |
 
 For `DATABASE_URL`, replace `postgres` with your PostgreSQL username if it differs,
 and `YOUR_PASSWORD` with the password you set when installing PostgreSQL. Keep the

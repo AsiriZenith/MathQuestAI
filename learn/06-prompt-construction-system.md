@@ -95,7 +95,7 @@ export const QUESTION_TYPE_ID_MAP: Record<string, { id: AiQuestionType; label: s
 };
 ```
 
-The Setup screen's chip UI (Lesson 5) works in short ids — `mc`, `fib`, `wp`, `tf`, `ms` (this is `RequestedTypeId` from `lib/types.ts`). The AI prompt needs the full `AiQuestionType` strings. This map is the one place that translation happens, in both directions: `questionTypeLabel(id)` looks a label up by AI id (used when rendering the prompt's Question Type section), and the reverse mapping is what the Setup form uses to convert its chip selections before calling `loadGenerationContextAction`. Keeping this translation in one small table means the UI's shorthand and the AI's vocabulary can evolve independently without every call site needing to know both.
+The Setup screen's chip UI (Lesson 5) works in short ids — `mc`, `fib`, `wp`, `tf`, `ms` (this is `QuestionType` from `lib/types.ts`). The AI prompt needs the full `AiQuestionType` strings. This map is the one place that translation happens, in both directions: `questionTypeLabel(id)` looks a label up by AI id (used when rendering the prompt's Question Type section), and the reverse mapping is what the Setup form uses to convert its chip selections before calling `loadGenerationContextAction`. Keeping this translation in one small table means the UI's shorthand and the AI's vocabulary can evolve independently without every call site needing to know both.
 
 ### `OUTPUT_FORMAT_INSTRUCTIONS` — the JSON contract, as prompt text
 

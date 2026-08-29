@@ -24,7 +24,7 @@ const TEST_CONTEXT: GenerationContext = {
 export default async function AiProviderCheckPage() {
   const prompt = buildPrompt({
     context: TEST_CONTEXT,
-    questionTypes: ["multiple_choice"],
+    questionTypes: ["mc"],
     questionCount: 1,
   });
 

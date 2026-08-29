@@ -84,6 +84,28 @@ The project combines:
 - PostgreSQL
 - Prisma
 
+The database holds the structured educational data (subjects, topics, subtopics,
+question patterns, reference questions, generation prompts) and, since TASK-016,
+a schema for **persisting generation runs** (`generation_contexts`,
+`generation_context_question_types`, `generation_context_question_patterns`,
+`generated_questions`). Generation itself never writes to the database — on the
+Questions page the user clicks **Save for Evaluation** and confirms, and only
+then does `lib/persistence/save-generation.ts` write the whole run atomically:
+the context (timestamp-derived name, difficulty, AI provider/model, final
+prompt, requested question count, and grade — TASK-021), the selected question
+types and patterns, and every generated question.
+Each generated question already carries its own `questionType` code and
+`questionPatternId` — the AI is given the selected patterns' ids and returns them
+verbatim (TASK-019), so persistence never resolves a pattern name to an id.
+The Evaluate Results dialog's "Compare with Previous Generations" option
+(TASK-020) finds saved runs whose difficulty, question patterns, and question
+types **exactly** match the current selection and lets the user pick one.
+Since TASK-023, selecting one evaluates **both** the current and the previous
+generation independently through the same unmodified evaluation pipeline,
+diffs the two results, and shows the comparison on a dedicated `/comparison`
+page — a real current-vs-previous comparison, not just a second evaluation
+report. See `docs/project-management/database.md` §35.
+
 ### Development
 
 - Claude Code
@@ -276,7 +298,8 @@ The intended response is JSON similar to:
     {
       "questionNumber": 1,
       "questionText": "Simplify 3x + 5x - 2.",
-      "questionType": "multiple_choice",
+      "questionType": "mc",
+      "questionPatternId": "<the exact id of a selected Question Pattern>",
       "options": [
         { "id": "A", "text": "8x - 2" },
         { "id": "B", "text": "8x + 2" },

@@ -76,6 +76,22 @@ ReferenceQuestions
 QuestionGenerationRequests
 ```
 
+### Question-generation persistence tables (added TASK-016)
+
+A finalized ER design for persisting generation runs has been added directly to
+PostgreSQL (hand-written SQL, executed by the developer):
+
+```text
+generation_contexts
+generation_context_question_types
+generation_context_question_patterns
+generated_questions
+```
+
+These are described in §35. The Prisma schema (`prisma/schema.prisma`) and the
+TypeScript domain types (`lib/persistence/types.ts`) were aligned to them in
+TASK-016 — the persistence *workflow* itself is a later task.
+
 The exact physical table names should follow the SQL schema that has already been created.
 
 The database implementation should not introduce additional tables unless a new requirement justifies them.
@@ -639,11 +655,15 @@ The current research scope intentionally does not require database tables for:
 - Authentication
 - User sessions
 - Student profiles
-- Persistent generated questions
 - Evaluation history
 - User progress
 
 These were deliberately excluded from the current database scope.
+
+**Update (TASK-016):** persistent generated questions are no longer excluded — the
+`generated_questions` table and its supporting `generation_contexts` /
+`generation_context_question_types` / `generation_context_question_patterns` tables
+now exist (§35). Evaluation history remains out of scope.
 
 ---
 
@@ -665,7 +685,9 @@ Display
 Evaluation
 ```
 
-There is currently no requirement to persist every generated question in PostgreSQL.
+**Update (TASK-016):** a persistence model now exists (§35). The generation flow
+above is unchanged for now — the schema/domain foundation is in place, but writing
+generated questions to the database is a later task.
 
 If future research requires historical comparison of generated results, a persistence model can be introduced later.
 
@@ -903,7 +925,6 @@ Any proposed schema change should be discussed and documented before implementat
 
 The following may be considered later if research requirements evolve:
 
-- GeneratedQuestions
 - EvaluationResults
 - ExperimentRuns
 - PromptVersions
@@ -913,6 +934,8 @@ The following may be considered later if research requirements evolve:
 These are intentionally **future possibilities**, not current requirements.
 
 Do not implement them unless a concrete requirement is introduced.
+
+`GeneratedQuestions` moved from this list into the actual schema in TASK-016 (§35).
 
 ---
 
@@ -925,3 +948,196 @@ The database should answer this question efficiently:
 If the answer is yes, the current database is doing its job.
 
 The database should not become more complex simply because more information could theoretically be stored.
+
+---
+
+# 35. Question-Generation Persistence (TASK-016)
+
+The finalized ER design for persisting a generation run. The SQL was written and
+executed manually by the developer; TASK-016 verified the live database against
+this design, mapped it into `prisma/schema.prisma`, and added matching TypeScript
+domain types in `lib/persistence/types.ts` (the `*Record` types — the plain names
+`GenerationContext` and `GeneratedQuestion` were already used by other layers).
+
+## Tables
+
+### `generation_contexts`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` | PK, default `gen_random_uuid()` |
+| `name` | `varchar(100)` | NOT NULL, **UNIQUE** (`uq_generation_contexts_name`) |
+| `difficulty_level` | `varchar(20)` | NOT NULL, CHECK `IN ('Easy','Medium','Hard')` |
+| `ai_provider` | `varchar(100)` | NOT NULL |
+| `ai_model` | `varchar(150)` | NOT NULL |
+| `prompt` | `text` | nullable |
+| `created_at` | `timestamptz` | NOT NULL, default `now()` |
+| `requested_question_count` | `integer` | nullable (added TASK-021) — no DB CHECK constraint; range/positivity is application-level only |
+| `grade` | `varchar(50)` | nullable (added TASK-021) — the real Setup-screen grade value, single-purpose |
+| `score` | `integer` | nullable (added TASK-022) — no DB CHECK constraint; the evaluation `promptEffectiveness` score, 0–100, validated at the application layer (`isValidScore`, `lib/persistence/validation.ts`) |
+
+Note the capitalized difficulty spelling — same as `reference_questions` /
+`question_generation_requests` (§9).
+
+`requested_question_count`/`grade` (TASK-021) and `score` (TASK-022) were all
+added directly to the live database by the project owner — no migration was
+created or run by any task. Rows saved before the relevant task have the
+corresponding column `NULL`; the application must not assume any of them is
+present.
+
+`updateGenerationContextScoreAction` (`lib/actions/evaluation.ts`) →
+`updateGenerationContextScore` (`lib/db/generation-context.ts`) writes the
+final evaluation score into `score` once the Evaluation page finishes
+evaluating a saved `GenerationContext`. An earlier version of this task wrote
+the score into `grade` instead (there being no `score` column at the time) —
+that was wrong, since it silently overwrote the real Setup-screen grade value.
+Corrected once the project owner added the dedicated `score` column; `grade`
+and `score` are now both single-purpose.
+
+### `generation_context_question_types`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` | PK, default `gen_random_uuid()` |
+| `generation_context_id` | `uuid` | NOT NULL, FK → `generation_contexts.id` |
+| `question_type` | `varchar(20)` | NOT NULL, CHECK `IN ('mc','fib','wp','tf','ms')` |
+
+UNIQUE `(generation_context_id, question_type)`. `question_type` is **not** a
+foreign key — there is no `question_types` table; the stable codes are the
+application's `QUESTION_TYPE_CODES` (`lib/types.ts`).
+
+### `generation_context_question_patterns`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` | PK, default `gen_random_uuid()` |
+| `generation_context_id` | `uuid` | NOT NULL, FK → `generation_contexts.id` |
+| `question_pattern_id` | `uuid` | NOT NULL, FK → `question_patterns.id` |
+
+UNIQUE `(generation_context_id, question_pattern_id)`.
+
+### `generated_questions`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` | PK, default `gen_random_uuid()` |
+| `generation_context_id` | `uuid` | NOT NULL, FK → `generation_contexts.id` |
+| `question_pattern_id` | `uuid` | NOT NULL (see integrity note) |
+| `question_type` | `varchar(20)` | NOT NULL, CHECK `IN ('mc','fib','wp','tf','ms')` |
+| `question_number` | `integer` | NOT NULL, CHECK `> 0` |
+| `question_text` | `text` | NOT NULL |
+| `expected_answer` | `text` | NOT NULL |
+| `explanation` | `text` | nullable |
+| `created_at` | `timestamptz` | NOT NULL, default `now()` |
+
+UNIQUE `(generation_context_id, question_number)`.
+
+## Integrity: a generated question can only use a selected type / pattern
+
+`generated_questions` has **two composite foreign keys**:
+
+```text
+(generation_context_id, question_type)       -> generation_context_question_types
+(generation_context_id, question_pattern_id) -> generation_context_question_patterns
+```
+
+So a `generated_questions` row can only reference a `(context, type)` and
+`(context, pattern)` pair that was actually recorded as selected for that
+generation context. There is **no direct FK** from
+`generated_questions.question_pattern_id` to `question_patterns.id` — the link to
+`question_patterns` is transitive, through
+`generation_context_question_patterns`.
+
+Prisma cannot express the CHECK constraints; the affected models carry the
+standard `/// This table contains check constraints …` doc-comment.
+
+## Writing these tables (TASK-017 / TASK-018 / TASK-019 / TASK-021 / TASK-022)
+
+`lib/persistence/save-generation.ts` `saveGeneration()` is the **only writer of
+a new row**. It is **not** part of generation — it runs when the user clicks
+**Save for Evaluation** on the Questions page and confirms the dialog
+(`saveGenerationAction`, TASK-018).
+
+1. `lib/persistence/map-generation.ts` `mapGeneration()` (pure) turns the
+   validated AI response + the user's selections into row shapes — mapping AI
+   `correctAnswer → expected_answer`. Since TASK-019 the AI already returns
+   `questionType` as the stable code and `questionPatternId` as the exact id, so
+   the mapper only checks each is one of the current selections — **no name
+   resolution**. `autoTypes` records all five type codes as selected. Since
+   TASK-021 it also carries through `requestedQuestionCount` (the number of
+   questions the user's generation run asked for — sourced from `GenerationMeta`,
+   **never** derived from how many questions the AI actually returned) and
+   `grade` (the real selected `PracticeConfig.grade`, not a placeholder) — a
+   non-positive count or blank grade persists as `NULL` rather than failing the
+   save.
+2. If any question's type or pattern id is not among the selections, nothing is
+   written — `saveGenerationAction` returns a generic failure and the Questions
+   page keeps the questions visible for a retry. (Generation itself already
+   rejects such a response at `stage: "validation"`, so this is defence in depth.)
+3. Otherwise a single interactive `prisma.$transaction` inserts, in order:
+   `generation_contexts` (name `Generation-YYYY-MM-DD-HH-MM-SS-mmm` derived from
+   the creation timestamp; now also carries `requested_question_count`/`grade`)
+   → `generation_context_question_types` → `generation_context_question_patterns`
+   → `generated_questions`. The order satisfies the composite foreign keys; any
+   failure rolls the whole batch back.
+
+The only writer that **updates** an existing row is
+`updateGenerationContextScore(generationContextId, score)`
+(`lib/db/generation-context.ts`, TASK-022), called once per `GenerationContext`
+it scores — from the Evaluation page after a standalone evaluation, and, since
+TASK-023, from the Comparison page **twice independently** (once for the
+current generation's id, if it has one, and once for the selected previous
+generation's id, which always has one) via the same unchanged
+`updateGenerationContextScoreAction` (`lib/actions/evaluation.ts`). It writes
+only `score = <the number>` for the given id. Validated with `isValidScore`
+(integer 0–100, `lib/persistence/validation.ts`) before touching the
+database; a missing id, an invalid score, or a not-found id all return the
+same safe generic error.
+
+## Reading these tables (TASK-020)
+
+`lib/db/generation-context.ts` gained the first documented readers of the join
+tables beyond the TASK-018 writer, for the Questions page's "Compare with
+Previous Generations" flow:
+
+- `findMatchingGenerationContexts({ difficultyLevel, questionTypeCodes,
+  questionPatternIds, excludeGenerationContextId? })` filters `generation_contexts`
+  by `difficulty_level` (and, when given, `id != excludeGenerationContextId` —
+  TASK-022, applied in the same `where` clause, server-side) in the database,
+  then compares each candidate's `questionTypes`/`questionPatterns` join rows
+  against the requested sets with `isExactSetMatch` (order-independent, no
+  partial matches — extra or missing patterns/types exclude the row). There is
+  no single Prisma query that expresses set equality against two join tables, so
+  the (typically small) per-difficulty candidate set is filtered in application
+  code rather than in SQL. Matching is always by id (`question_pattern_id`) and
+  code (`question_type`), never by name. `excludeGenerationContextId` keeps a
+  just-saved generation from appearing as a candidate for comparison against
+  itself — the Questions page passes its own `savedGenerationContextId`
+  (already retained since TASK-018).
+- `loadSavedGeneration(generationContextId)` reconstructs a full saved run for
+  evaluation: the saved `question_patterns` row's `subtopic → topic → subject`
+  chain supplies the subject/subtopic names and subtopic id, which are then
+  handed straight to the existing `getGenerationContext()` to rebuild reference
+  questions and generation prompts — the read path is not duplicated.
+  `requestedQuestionCount` and `grade` are read straight from
+  `generation_contexts.requested_question_count`/`.grade` (TASK-021) — no
+  longer the TASK-020 placeholders (`generatedQuestions.length` / `"N/A"`
+  unconditionally). A record saved before TASK-021 has
+  `requested_question_count IS NULL`; since there is no honest way to recover
+  the original request, `loadSavedGeneration` blocks evaluation for it with a
+  clear error rather than inventing a number (mirrors `prepareEvaluation`'s
+  existing missing-prompt guard). A `NULL` `grade` still falls back to `"N/A"`
+  — safe because `grade` is display-only and never affects evaluation scoring.
+  MC `options` are also not persisted (`generated_questions` has no `options`
+  column), so a saved multiple-choice question always reconstructs without its
+  option list — evaluation scoring does not depend on options, so this does not
+  block evaluation, but it is a known limitation worth a schema follow-up if MC
+  saved-review UI is added later.
+
+Both functions live in `lib/db/generation-context.ts` next to the existing
+`getGenerationContext()`, following its established `server-only` +
+try/catch-returns-a-safe-error convention. The "current selection" side of a
+match (`resolveSelectedTypeCodes`, `resolveSelectedPatternIds`,
+`isExactSetMatch`) is pure and lives in `lib/persistence/matching.ts`, shared
+with `mapGeneration()` so the writer and the matcher can never disagree about
+what "the current selection" means.

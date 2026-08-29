@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { AI_QUESTION_TYPE_META } from "@/components/common/ai-question-type-meta";
+import { QUESTION_TYPE_META } from "@/components/common/question-type-meta";
 import { TypeBadge } from "@/components/common/type-badge";
 import type { GeneratedQuestion } from "@/lib/prompts/types";
 
@@ -21,7 +21,7 @@ export function QuestionCoverage({ questions }: { questions: GeneratedQuestion[]
       </div>
       <div className="flex flex-wrap gap-2">
         {distinctTypes.map((typeId) => (
-          <TypeBadge key={typeId} meta={AI_QUESTION_TYPE_META[typeId]} />
+          <TypeBadge key={typeId} meta={QUESTION_TYPE_META[typeId]} />
         ))}
       </div>
     </motion.div>

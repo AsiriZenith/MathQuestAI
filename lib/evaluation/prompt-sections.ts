@@ -60,10 +60,10 @@ export function splitPromptSections(prompt: string): Record<PromptSectionId, str
 }
 
 /**
- * Whether the prompt asked the model to label questions with their pattern.
+ * Whether the prompt asked the model to tag questions with their pattern id.
  * Runs generated before that instruction existed cannot be scored on pattern
  * adherence, and are reported as not-applicable instead.
  */
-export function promptRequestsPatternLabels(prompt: string): boolean {
-  return prompt.includes("questionPattern");
+export function promptRequestsPatternIds(prompt: string): boolean {
+  return prompt.includes("questionPatternId");
 }

@@ -91,13 +91,13 @@ export function deriveImprovements(input: ImprovementInput): ImprovementOpportun
   if (patternCoverage.unlabelled > 0) {
     improvements.push({
       id: "pattern_labels_missing",
-      problem: `${patternCoverage.unlabelled} question(s) came back with no questionPattern label.`,
+      problem: `${patternCoverage.unlabelled} question(s) came back with no questionPatternId.`,
       evidence:
-        "The OUTPUT FORMAT section requires a questionPattern field on every question, but some questions omitted it — so their pattern cannot be evaluated.",
+        "The OUTPUT FORMAT section requires a questionPatternId on every question, but some questions omitted it — so their pattern cannot be evaluated.",
       likelyPromptWeakness:
         "The field is described after the JSON example rather than being emphasised as mandatory alongside the other required fields.",
       suggestedChange:
-        'Every question object MUST include a non-empty "questionPattern" field. Omitting it makes the response invalid.',
+        'Every question object MUST include a non-empty "questionPatternId" set to one of the ids from the SELECTED QUESTION PATTERNS section. Omitting it makes the response invalid.',
       targetFile: "lib/prompts/common.ts › OUTPUT_FORMAT_INSTRUCTIONS",
       promptSection: "output_format",
     });
@@ -182,7 +182,7 @@ export function deriveImprovements(input: ImprovementInput): ImprovementOpportun
       likelyPromptWeakness:
         "OUTPUT FORMAT shows a single example object, leaving rules that apply across the whole set (numbering, per-type field usage) implicit.",
       suggestedChange:
-        "Number the questions sequentially from 1 with no repeats. Include the options array only for multiple_choice questions. Every explanation must describe the full solution.",
+        'Number the questions sequentially from 1 with no repeats. Include the options array only for "mc" questions. Every explanation must describe the full solution.',
       targetFile: "lib/prompts/common.ts › OUTPUT_FORMAT_INSTRUCTIONS",
       promptSection: "output_format",
     });

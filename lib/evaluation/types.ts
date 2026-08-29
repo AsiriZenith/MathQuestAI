@@ -1,4 +1,4 @@
-import type { AiQuestionType } from "@/lib/prompts/types";
+import type { QuestionType } from "@/lib/types";
 import type { Difficulty } from "@/lib/types";
 
 /**
@@ -165,13 +165,52 @@ export interface ConfigurationSummary {
   difficulty: Difficulty;
   requestedPatterns: string[];
   usedAllPatterns: boolean;
-  requestedTypes: { id: AiQuestionType; label: string }[];
+  requestedTypes: { id: QuestionType; label: string }[];
   usedAiMix: boolean;
   requestedQuestionCount: number;
   generatedQuestionCount: number;
 }
 
 export type EffectivenessBand = "strong" | "moderate" | "weak";
+
+/**
+ * A single comparable number, current vs. previous (TASK-023).
+ * `difference = current - previous`: positive means the current generation
+ * scored higher, negative means lower, zero means equal.
+ */
+export interface ScoreDelta {
+  current: number;
+  previous: number;
+  difference: number;
+}
+
+/**
+ * One evaluation dimension, current vs. previous. `current`/`previous` mirror
+ * `DimensionScore.score` (0..1, or null when not applicable to that side).
+ * `difference` is only computed when both sides are non-null — never
+ * fabricated by treating a missing score as 0.
+ */
+export interface DimensionComparison {
+  id: DimensionId;
+  label: string;
+  current: number | null;
+  previous: number | null;
+  difference: number | null;
+}
+
+/**
+ * Output of comparing two already-computed {@link EvaluationResult}s
+ * (TASK-023). Deliberately limited to the numeric metrics that already have a
+ * clear delta semantic (overall score, per-dimension score) — coverage
+ * reports, difficulty signals, integrity checks, reference alignment, and
+ * deviations are structured, not single numbers, and the evaluation engine
+ * defines no delta for them, so they are displayed side by side from each
+ * side's own unmodified `EvaluationResult` instead of diffed here.
+ */
+export interface ComparisonResult {
+  overallScore: ScoreDelta;
+  dimensions: DimensionComparison[];
+}
 
 export interface EvaluationResult {
   /** 0..100, rounded. Weighted across applicable dimensions only. */

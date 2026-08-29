@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import { PracticeSessionProvider } from "@/components/providers/practice-session-provider";
 import type { GenerationResponse } from "@/lib/prompts/types";
 import type {
+  ComparisonData,
   EvaluationData,
   GenerationContext,
   GenerationMeta,
@@ -17,6 +18,8 @@ export function renderWithSession(
     generationContext?: GenerationContext | null;
     generationMeta?: GenerationMeta | null;
     evaluationData?: EvaluationData | null;
+    savedGenerationContextId?: string | null;
+    comparisonData?: ComparisonData | null;
   } = {},
   options?: Omit<RenderOptions, "wrapper">,
 ) {
@@ -28,6 +31,8 @@ export function renderWithSession(
         initialGenerationContext={initialState.generationContext ?? null}
         initialGenerationMeta={initialState.generationMeta ?? null}
         initialEvaluationData={initialState.evaluationData ?? null}
+        initialSavedGenerationContextId={initialState.savedGenerationContextId ?? null}
+        initialComparisonData={initialState.comparisonData ?? null}
       >
         {children}
       </PracticeSessionProvider>
@@ -65,8 +70,8 @@ export const TEST_GENERATION_RESPONSE: GenerationResponse = {
   questions: Array.from({ length: 10 }, (_, i) => ({
     questionNumber: i + 1,
     questionText: `Simplify the expression ${i + 1}.`,
-    questionType: "multiple_choice" as const,
-    questionPattern: "Combine Like Terms",
+    questionType: "mc" as const,
+    questionPatternId: "pattern-a",
     options: [
       { id: "A", text: "Option A" },
       { id: "B", text: "Option B" },
@@ -82,11 +87,11 @@ export const TEST_GENERATION_RESPONSE: GenerationResponse = {
 export const TEST_PROMPT = [
   "COMMON INSTRUCTIONS\n-------------------\nGenerate exactly the requested number of questions.",
   "GENERATION REQUIREMENT\n----------------------\nGenerate 10 questions.",
-  'EDUCATIONAL CONTEXT\n-------------------\nSubject: Mathematics\nSubtopic: Simplify & Calculate\n\nQuestion Patterns:\n- Combine Like Terms\n\nLabel every generated question with the exact Question Pattern name it implements, using the "questionPattern" field described in the OUTPUT FORMAT section.',
+  'EDUCATIONAL CONTEXT\n-------------------\nSubject: Mathematics\nSubtopic: Simplify & Calculate\n\nSELECTED QUESTION PATTERNS\n\n1.\n   ID: pattern-a\n   Name: Combine Like Terms\n\nFor every generated question, set the "questionPatternId" field to the exact ID shown above.',
   "DIFFICULTY\n----------\nEasy\n\nEasy means:\nDirect application of the Question Pattern.",
-  "QUESTION TYPE\n-------------\nMultiple Choice",
+  "QUESTION TYPE\n-------------\nSELECTED QUESTION TYPES\n\n- ID: mc\n  Name: Multiple Choice",
   "REFERENCE QUESTIONS\n-------------------\nNo reference questions are available for this context.",
-  'OUTPUT FORMAT\n-------------\nReturn ONLY valid JSON. The "questionPattern" field is required for every question.',
+  'OUTPUT FORMAT\n-------------\nReturn ONLY valid JSON. The "questionPatternId" field is required for every question.',
 ].join("\n\n");
 
 export const TEST_GENERATION_META: GenerationMeta = {
