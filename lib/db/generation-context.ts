@@ -2,6 +2,12 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import type { Difficulty, GenerationContextResult } from "@/lib/types";
 
+const DIFFICULTY_DB_VALUE: Record<Difficulty, string> = {
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
+};
+
 export async function getGenerationContext(input: {
   subjectName: string;
   subtopicId: string;
@@ -24,14 +30,15 @@ export async function getGenerationContext(input: {
     }
 
     const patternIds = patterns.map((p) => p.id);
+    const difficultyLevel = DIFFICULTY_DB_VALUE[input.difficulty];
 
     const [generationRequests, referenceQuestions] = await Promise.all([
       prisma.questionGenerationRequest.findMany({
-        where: { questionPatternId: { in: patternIds }, difficultyLevel: input.difficulty },
+        where: { questionPatternId: { in: patternIds }, difficultyLevel },
         select: { questionPatternId: true, generationPrompt: true },
       }),
       prisma.referenceQuestion.findMany({
-        where: { questionPatternId: { in: patternIds }, difficultyLevel: input.difficulty },
+        where: { questionPatternId: { in: patternIds }, difficultyLevel },
         select: {
           id: true,
           questionPatternId: true,

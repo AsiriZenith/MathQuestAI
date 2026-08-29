@@ -76,20 +76,45 @@ describe("getGenerationContext", () => {
     });
   });
 
+  it("queries reference questions and generation requests with the DB's capitalized difficulty", async () => {
+    findManyQuestionPattern.mockResolvedValue([PATTERN_A]);
+    findManyQuestionGenerationRequest.mockResolvedValue([]);
+    findManyReferenceQuestion.mockResolvedValue([]);
+
+    await getGenerationContext({
+      subjectName: "Mathematics",
+      subtopicId: "subtopic-1",
+      subtopicName: "Simplify & Calculate",
+      difficulty: "medium",
+      patternIds: ["pattern-a"],
+    });
+
+    expect(findManyReferenceQuestion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ difficultyLevel: "Medium" }),
+      }),
+    );
+    expect(findManyQuestionGenerationRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ difficultyLevel: "Medium" }),
+      }),
+    );
+  });
+
   it("assembles a context with prompt and reference questions merged per selected pattern only", async () => {
     findManyQuestionPattern.mockResolvedValue([PATTERN_A]);
     findManyQuestionGenerationRequest.mockResolvedValue([
       { questionPatternId: "pattern-a", generationPrompt: "Prompt A" },
     ]);
-    findManyReferenceQuestion.mockResolvedValue([
-      {
-        id: "ref-1",
+    findManyReferenceQuestion.mockResolvedValue(
+      Array.from({ length: 5 }, (_, i) => ({
+        id: `ref-${i + 1}`,
         questionPatternId: "pattern-a",
-        questionText: "3x + 2x = ?",
-        expectedAnswer: "5x",
+        questionText: `3x + ${i + 1}x = ?`,
+        expectedAnswer: `${i + 4}x`,
         explanation: null,
-      },
-    ]);
+      })),
+    );
 
     const result = await getGenerationContext({
       subjectName: "Mathematics",
@@ -106,7 +131,7 @@ describe("getGenerationContext", () => {
 
     const patternA = result.context.patterns.find((p) => p.id === "pattern-a");
     expect(patternA?.generationPrompt).toBe("Prompt A");
-    expect(patternA?.referenceQuestions).toHaveLength(1);
+    expect(patternA?.referenceQuestions).toHaveLength(5);
 
     expect(result.context.patterns.find((p) => p.id === "pattern-b")).toBeUndefined();
   });

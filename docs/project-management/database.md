@@ -268,6 +268,19 @@ These definitions are specific to MathQuestAI.
 
 They are not intended to be a universal mathematical difficulty standard.
 
+## Stored representation
+
+`reference_questions.difficulty_level` and `question_generation_requests.difficulty_level`
+are free-text `VARCHAR(20)` columns (no enum, no lookup table). The seeded rows store the
+**capitalized** form exactly as listed above: `Easy`, `Medium`, `Hard`.
+
+The application's `Difficulty` type is lowercase (`"easy" | "medium" | "hard"`).
+`getGenerationContext` (`lib/db/generation-context.ts`) normalizes the lowercase value to
+the capitalized DB form (`DIFFICULTY_DB_VALUE`) before filtering these two tables. The
+filter is an exact string match, so any new rows must use the same capitalized spelling.
+(This mismatch was the root cause fixed in TASK-015 — reference questions and generation
+prompts were silently absent from the AI prompt.)
+
 ---
 
 # 10. Difficulty and Database Design

@@ -28,7 +28,17 @@ export async function generateQuestions(
     questionCount: DEFAULT_QUESTION_COUNT,
   });
 
-  console.log("generateQuestions: generation started");
+  console.log(
+    [
+      "generateQuestions: generation started",
+      `  questionTypes: ${JSON.stringify(questionTypes)}`,
+      `  questionCount: ${DEFAULT_QUESTION_COUNT}`,
+      `  patterns: ${context.patterns.map((p) => p.name).join(", ")}`,
+      "----- FINAL PROMPT BEGIN -----",
+      prompt,
+      "----- FINAL PROMPT END -----",
+    ].join("\n"),
+  );
 
   const responseJsonSchema = z.toJSONSchema(generationResponseSchema);
   const providerResult = await provider.generate({ prompt, responseJsonSchema });
