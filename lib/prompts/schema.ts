@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { QUESTION_TYPE_CODES } from "@/lib/types";
 import type { ParsedGenerationResponse } from "@/lib/prompts/types";
 
 const optionSchema = z.object({
@@ -25,32 +26,22 @@ const questionSchema = z
   .object({
     questionNumber: z.number().int().positive(),
     questionText: z.string().min(1),
-    questionType: z.enum([
-      "multiple_choice",
-      "fill_in_the_blank",
-      "word_problem",
-      "true_false",
-      "multi_step",
-    ]),
-    // Optional by design: a missing pattern label must not discard an otherwise
-    // valid set of questions. The evaluation pipeline measures its absence instead
-    // (see lib/evaluation/dimensions/pattern-adherence.ts).
-    questionPattern: z.preprocess(
-      (value) => {
-        const normalised = emptyToUndefined(value);
-        return typeof normalised === "string" ? normalised.trim() : normalised;
-      },
-      z.string().optional(),
-    ),
-    // Same treatment: the prompt tells the model to omit `options` for
-    // non-multiple-choice questions, and a literal `null` there must not
-    // invalidate the batch. The multiple_choice case is enforced below.
+    // The stable question-type code (TASK-019). Membership in the user's
+    // selected types is checked afterwards by validateClassification.
+    questionType: z.enum(QUESTION_TYPE_CODES),
+    // Required (TASK-019): the exact database id of a selected Question Pattern.
+    // Whether it is actually one of the selected ids is checked by
+    // validateClassification, which has the selection to compare against.
+    questionPatternId: z.string().trim().min(1),
+    // The prompt tells the model to omit `options` for non-mc questions, and a
+    // literal `null` there must not invalidate the batch. The mc case is
+    // enforced below.
     options: z.preprocess(emptyToUndefined, z.array(optionSchema).optional()),
     correctAnswer: z.string().min(1),
     explanation: z.string().min(1),
   })
   .superRefine((question, ctx) => {
-    if (question.questionType === "multiple_choice") {
+    if (question.questionType === "mc") {
       if (!question.options || question.options.length === 0) {
         ctx.addIssue({
           code: "custom",

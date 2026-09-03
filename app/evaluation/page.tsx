@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { usePracticeSession } from "@/components/providers/practice-session-provider";
+import { updateGenerationContextScoreAction } from "@/lib/actions/evaluation";
 import { PromptEffectivenessHero } from "./_components/prompt-effectiveness-hero";
 import { ScoreBreakdown } from "./_components/score-breakdown";
 import { AskedVsReceived } from "./_components/asked-vs-received";
@@ -19,6 +20,8 @@ import { ExportActions } from "./_components/export-actions";
 export default function EvaluationPage() {
   const router = useRouter();
   const { evaluationData } = usePracticeSession();
+  const [scoreSaveFailed, setScoreSaveFailed] = useState(false);
+  const persistedRef = useRef(false);
 
   useEffect(() => {
     if (!evaluationData) {
@@ -26,12 +29,29 @@ export default function EvaluationPage() {
     }
   }, [evaluationData, router]);
 
+  useEffect(() => {
+    if (!evaluationData?.generationContextId || persistedRef.current) return;
+    persistedRef.current = true;
+
+    updateGenerationContextScoreAction({
+      generationContextId: evaluationData.generationContextId,
+      score: evaluationData.result.promptEffectiveness,
+    }).then((res) => {
+      if (!res.ok) setScoreSaveFailed(true);
+    });
+  }, [evaluationData]);
+
   if (!evaluationData) return null;
 
   const { result } = evaluationData;
 
   return (
     <main className="relative z-10 max-w-3xl mx-auto px-6 pb-24">
+      {scoreSaveFailed && (
+        <p role="alert" className="text-center text-xs text-destructive mb-4">
+          Couldn&apos;t save this generation&apos;s score. Your evaluation report is unaffected.
+        </p>
+      )}
       <button
         type="button"
         onClick={() => router.push("/questions")}

@@ -20,12 +20,12 @@ model Subject {
 }
 
 model Topic {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  subjectId String    @map("subject_id") @db.Uuid
-  name      String    @db.VarChar(100)
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
-  subject   Subject   @relation(fields: [subjectId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_topics_subject")
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subjectId String     @map("subject_id") @db.Uuid
+  name      String     @db.VarChar(100)
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @default(now()) @map("updated_at") @db.Timestamptz(6)
+  subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_topics_subject")
   subtopics Subtopic[]
 
   @@unique([subjectId, name], map: "uq_topic_subject_name")
@@ -47,14 +47,15 @@ model Subtopic {
 }
 
 model QuestionPattern {
-  id                        String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  subtopicId                String                     @map("subtopic_id") @db.Uuid
-  name                      String                     @db.VarChar(150)
-  createdAt                 DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt                 DateTime                   @default(now()) @map("updated_at") @db.Timestamptz(6)
-  subtopic                  Subtopic                   @relation(fields: [subtopicId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_question_patterns_subtopic")
-  referenceQuestions        ReferenceQuestion[]
-  questionGenerationRequests QuestionGenerationRequest[]
+  id                                String                             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subtopicId                        String                             @map("subtopic_id") @db.Uuid
+  name                              String                             @db.VarChar(150)
+  createdAt                         DateTime                           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                         DateTime                           @default(now()) @map("updated_at") @db.Timestamptz(6)
+  subtopic                          Subtopic                           @relation(fields: [subtopicId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_question_patterns_subtopic")
+  referenceQuestions                ReferenceQuestion[]
+  questionGenerationRequests        QuestionGenerationRequest[]
+  generationContextQuestionPatterns GenerationContextQuestionPattern[]
 
   @@unique([subtopicId, name], map: "uq_question_pattern_subtopic_name")
   @@map("question_patterns")
@@ -84,4 +85,98 @@ model QuestionGenerationRequest {
 
   @@unique([questionPatternId, difficultyLevel], map: "uq_question_generation_requests_pattern_difficulty")
   @@map("question_generation_requests")
+}
+
+// ---------------------------------------------------------------------------
+// Question-generation persistence (TASK-016)
+//
+// These four tables were created directly in PostgreSQL by hand-written SQL and
+// mapped here by `prisma db pull`. They persist a generation run: the context it
+// was produced from, the question types / patterns selected for it, and the
+// resulting questions.
+//
+// Integrity: a GeneratedQuestion can only use a question type / pattern that was
+// selected for its GenerationContext. This is enforced by the two composite
+// foreign keys on `generated_questions` -> `generation_context_question_types`
+// and `-> generation_context_question_patterns` (not by a direct FK from
+// `generated_questions.question_pattern_id` to `question_patterns.id`).
+//
+// CHECK constraints that Prisma cannot represent (see the `///` warnings):
+//   chk_generation_contexts_difficulty          difficulty_level IN ('Easy','Medium','Hard')
+//   chk_generation_context_question_types_type   question_type    IN ('mc','fib','wp','tf','ms')
+//   chk_generated_questions_question_type        question_type    IN ('mc','fib','wp','tf','ms')
+//   chk_generated_questions_question_number      question_number  > 0
+//
+// `requested_question_count`/`grade`/`score` (TASK-021/TASK-022) carry no DB
+// CHECK constraint despite earlier notes here claiming one for
+// requested_question_count — verified against pg_constraint directly (no such
+// constraint exists); range/positivity is enforced at the application layer
+// only (lib/persistence/matching.ts's callers, lib/persistence/validation.ts's
+// isValidScore).
+// ---------------------------------------------------------------------------
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model GenerationContext {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                   String   @unique(map: "uq_generation_contexts_name") @db.VarChar(100)
+  difficultyLevel        String   @map("difficulty_level") @db.VarChar(20)
+  aiProvider             String   @map("ai_provider") @db.VarChar(100)
+  aiModel                String   @map("ai_model") @db.VarChar(150)
+  prompt                 String?
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  requestedQuestionCount Int?     @map("requested_question_count")
+  grade                  String?  @db.VarChar(50)
+  score                  Int?
+
+  questionTypes      GenerationContextQuestionType[]
+  questionPatterns   GenerationContextQuestionPattern[]
+  generatedQuestions GeneratedQuestion[]
+
+  @@map("generation_contexts")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model GenerationContextQuestionType {
+  id                  String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  generationContextId String @map("generation_context_id") @db.Uuid
+  questionType        String @map("question_type") @db.VarChar(20)
+
+  generationContext  GenerationContext   @relation(fields: [generationContextId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_generation_context_question_types_context")
+  generatedQuestions GeneratedQuestion[]
+
+  @@unique([generationContextId, questionType], map: "uq_generation_context_question_types")
+  @@map("generation_context_question_types")
+}
+
+model GenerationContextQuestionPattern {
+  id                  String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  generationContextId String @map("generation_context_id") @db.Uuid
+  questionPatternId   String @map("question_pattern_id") @db.Uuid
+
+  generationContext  GenerationContext   @relation(fields: [generationContextId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_generation_context_question_patterns_context")
+  questionPattern    QuestionPattern     @relation(fields: [questionPatternId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_generation_context_question_patterns_pattern")
+  generatedQuestions GeneratedQuestion[]
+
+  @@unique([generationContextId, questionPatternId], map: "uq_generation_context_question_patterns")
+  @@map("generation_context_question_patterns")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model GeneratedQuestion {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  generationContextId String   @map("generation_context_id") @db.Uuid
+  questionPatternId   String   @map("question_pattern_id") @db.Uuid
+  questionType        String   @map("question_type") @db.VarChar(20)
+  questionNumber      Int      @map("question_number")
+  questionText        String   @map("question_text")
+  expectedAnswer      String   @map("expected_answer")
+  explanation         String?
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  generationContext       GenerationContext                @relation(fields: [generationContextId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_generated_questions_context")
+  selectedQuestionPattern GenerationContextQuestionPattern @relation(fields: [generationContextId, questionPatternId], references: [generationContextId, questionPatternId], onDelete: NoAction, onUpdate: NoAction, map: "fk_generated_questions_context_pattern")
+  selectedQuestionType    GenerationContextQuestionType    @relation(fields: [generationContextId, questionType], references: [generationContextId, questionType], onDelete: NoAction, onUpdate: NoAction, map: "fk_generated_questions_context_type")
+
+  @@unique([generationContextId, questionNumber], map: "uq_generated_questions_context_number")
+  @@map("generated_questions")
 }

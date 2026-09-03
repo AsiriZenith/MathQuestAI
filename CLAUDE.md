@@ -231,6 +231,57 @@ The database contains concepts such as:
 - Reference Questions
 - Question Generation Requests
 
+Since TASK-016 it also contains a schema for persisting generation runs
+(`generation_contexts`, `generation_context_question_types`,
+`generation_context_question_patterns`, `generated_questions`). Persistence is
+**user-triggered** (TASK-018): AI generation never writes to the database; on the
+Questions page the user clicks **Save for Evaluation** and confirms, and
+`saveGenerationAction` → `saveGeneration` (`lib/persistence/save-generation.ts`)
+then writes the whole run as one atomic record (context + selected question
+types + selected question patterns + generated questions).
+
+Each generated question is self-classified: the prompt gives the AI the selected
+Question Patterns' database ids (and names), and every question returns its
+`questionType` code and the exact `questionPatternId` (TASK-019). Generation is
+rejected if any question's type/pattern id is not one the user selected — there
+is no name-to-id resolution anywhere.
+
+The Questions page can also compare the current generation against a
+**previously saved** run. "Compare with Previous Generations" in the Evaluate
+Results dialog finds saved `generation_contexts` whose difficulty +
+question-pattern-id set + question-type set **exactly** matches the current
+selection (`findMatchingGenerationContexts`, `lib/db/generation-context.ts`,
+TASK-020), the user picks exactly one. Since TASK-023, this lands on a
+**dedicated `/comparison` route** — not `/evaluation` — after evaluating
+**both** generations independently through the exact same unmodified pipeline
+(`prepareEvaluation` for the current one, `prepareSavedEvaluation` for the
+previous one), then diffing the two fresh `EvaluationResult`s with a new pure
+function (`compareEvaluationResults`, `lib/evaluation/compare-evaluations.ts`).
+Both sides' scores persist independently via the existing
+`updateGenerationContextScoreAction`. No stored score is ever trusted as
+comparison input — `loadSavedGeneration` doesn't even expose that column, so
+this is structurally guaranteed, not just a convention. `/evaluation` and its
+single-result data contract (`EvaluationData`) are untouched and still power
+"Evaluate Against Predefined Questions."
+
+`generation_contexts` also persists the real `requestedQuestionCount` and
+`grade` from the generation run that produced it (TASK-021, columns added
+directly to the live database by the project owner — no migration in this
+repo). Both are read back verbatim by `loadSavedGeneration` rather than
+approximated; a record saved before this existed has `requestedQuestionCount
+IS NULL` and evaluation is safely blocked for it rather than guessing.
+
+Two patches (TASK-022): (1) the Evaluation page persists the final score back
+onto the `GenerationContext` it evaluated (`updateGenerationContextScoreAction`
+→ `updateGenerationContextScore`), into a dedicated nullable `score` column
+added directly to the live database by the project owner (no migration in
+this repo) — an earlier version of this wrote the score into `grade` instead,
+which was wrong (it destroyed the real Setup-screen grade value); corrected
+once the real column existed; (2) "Compare with Previous Generations"
+excludes the current generation's own saved id from its match candidates
+(`excludeGenerationContextId`, applied server-side) so a just-saved context
+never matches against itself.
+
 The detailed schema and relationships are documented in:
 
 `docs/project-management/database.md`

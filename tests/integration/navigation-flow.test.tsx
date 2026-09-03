@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { waitFor } from "@testing-library/react";
 import QuestionsPage from "@/app/questions/page";
 import EvaluationPage from "@/app/evaluation/page";
+import ComparisonPage from "@/app/comparison/page";
 import GeneratePage from "@/app/generate/page";
 import { renderWithSession, TEST_CONFIG, TEST_GENERATION_RESPONSE } from "../test-utils";
 
@@ -37,6 +38,11 @@ describe("Direct navigation without prior session state", () => {
 
   it("redirects /evaluation to / when there is no config", async () => {
     renderWithSession(<EvaluationPage />, {});
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/"));
+  });
+
+  it("redirects /comparison to / when there is no comparison data", async () => {
+    renderWithSession(<ComparisonPage />, {});
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/"));
   });
 

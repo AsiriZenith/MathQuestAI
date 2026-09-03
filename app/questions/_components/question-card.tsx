@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
-import { AI_QUESTION_TYPE_META } from "@/components/common/ai-question-type-meta";
+import { QUESTION_TYPE_META } from "@/components/common/question-type-meta";
 import { TypeBadge } from "@/components/common/type-badge";
 import type { GeneratedQuestion } from "@/lib/prompts/types";
 
@@ -15,7 +15,7 @@ export function QuestionCard({
   difficultyLabel: string;
   difficultyStyle: string;
 }) {
-  const meta = AI_QUESTION_TYPE_META[question.questionType];
+  const meta = QUESTION_TYPE_META[question.questionType];
 
   return (
     <motion.div

@@ -397,6 +397,15 @@ Simplify Multi-Operation Expressions
 If the tables exist but the counts are all `0`, the database was created but the
 backup never restored into it. Redo Step 3.3.
 
+> **Generation-persistence tables (TASK-016).** The database also has four tables
+> for persisting generation runs — `generation_contexts`,
+> `generation_context_question_types`, `generation_context_question_patterns`,
+> `generated_questions` — created by a separate hand-written SQL script, not by the
+> educational-data backup. They start empty and nothing writes to them yet
+> (the persistence workflow is a later task). If your restore predates that script
+> and these tables are missing, ask the project owner for the DDL. Schema in
+> `docs/project-management/database.md` §35.
+
 ---
 
 ## Step 4 — Configure environment variables
@@ -414,22 +423,24 @@ cp .env.example .env.local
 > runner, and you will get confusing "database not found" errors while everything
 > *looks* configured. `.env.local` is gitignored, so your credentials stay local.
 
-Open `.env.local` and fill it in. There are only four variables in the entire project:
+Open `.env.local` and fill it in. There are only a handful of variables in the entire project:
 
 ```env
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/MathQuestAI?schema=public"
 
 AI_API_KEY=your-api-key-here
-AI_MODEL=openai/gpt-oss-120b
-AI_BASE_URL=https://api.groq.com/openai/v1
+AI_MODEL=deepseek-chat
+AI_BASE_URL=https://api.deepseek.com
+AI_PROVIDER=deepseek
 ```
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `DATABASE_URL` | **Yes** | PostgreSQL connection string. |
 | `AI_API_KEY` | **Yes** (for generation) | API key for your AI provider. |
-| `AI_MODEL` | No | Defaults to `openai/gpt-oss-120b`. |
-| `AI_BASE_URL` | No | Defaults to `https://api.groq.com/openai/v1`. |
+| `AI_MODEL` | No | Defaults to `deepseek-chat`. |
+| `AI_BASE_URL` | No | Defaults to `https://api.deepseek.com`. |
+| `AI_PROVIDER` | No | Short provider label saved on each generation record. Defaults to `deepseek`. |
 
 For `DATABASE_URL`, replace `postgres` with your PostgreSQL username if it differs,
 and `YOUR_PASSWORD` with the password you set when installing PostgreSQL. Keep the
@@ -491,18 +502,19 @@ POST  {AI_BASE_URL}/chat/completions
 
 | Provider | `AI_BASE_URL` | Example `AI_MODEL` | Status |
 | --- | --- | --- | --- |
-| **Groq** (default) | `https://api.groq.com/openai/v1` | `openai/gpt-oss-120b` | ✅ Verified working in this project |
+| **DeepSeek** (default) | `https://api.deepseek.com` | `deepseek-chat` | ✅ Verified working in this project |
+| Groq | `https://api.groq.com/openai/v1` | `openai/gpt-oss-120b` | ✅ Previously used in this project |
 | Google Gemini (OpenAI-compatible endpoint) | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-2.0-flash` | ⚠️ Not yet tested here |
 | OpenAI | `https://api.openai.com/v1` | `gpt-4o-mini` | ⚠️ Not yet tested here |
 
-**Recommended for new members: use Groq.** It is the configuration the project has
-actually been verified against, and it has a free tier.
+**Recommended for new members: use DeepSeek.** It is the configuration the project
+currently runs against.
 
-1. Create an account at <https://console.groq.com/>.
+1. Create an account at <https://platform.deepseek.com/>.
 2. Generate an API key.
 3. Put it in `.env.local` as `AI_API_KEY`.
 4. Leave `AI_MODEL` and `AI_BASE_URL` at the values shown in Step 4 (or delete both
-   lines — they fall back to exactly those Groq defaults).
+   lines — they fall back to exactly those DeepSeek defaults).
 
 > **Do not put a trailing slash on `AI_BASE_URL`.** It is concatenated directly with
 > `/chat/completions`, so `.../v1/` produces a malformed `.../v1//chat/completions`
@@ -600,7 +612,7 @@ Runs everything end to end: database context → prompt → AI → schema valida
 - ❌ `FAILED at stage: prompt` → context/database problem.
 - ❌ `FAILED at stage: provider` → AI connectivity (go back to check 3).
 - ❌ `FAILED at stage: validation` → the model returned JSON that does not match the
-  expected schema. Usually a model-quality issue; try the default Groq model.
+  expected schema. Usually a model-quality issue; try the default `deepseek-chat` model.
 
 ### 5. Walk the real application
 

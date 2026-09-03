@@ -18,21 +18,27 @@ const CONTEXT: GenerationContext = {
   ],
 };
 
-const VALID_RESPONSE_JSON = JSON.stringify({
-  questions: [
-    {
-      questionNumber: 1,
-      questionText: "Simplify 3x + 5x.",
-      questionType: "multiple_choice",
-      options: [
-        { id: "A", text: "8x" },
-        { id: "B", text: "5x" },
-      ],
-      correctAnswer: "A",
-      explanation: "3x and 5x are like terms.",
-    },
-  ],
-});
+function responseJson(overrides: Record<string, unknown> = {}): string {
+  return JSON.stringify({
+    questions: [
+      {
+        questionNumber: 1,
+        questionText: "Simplify 3x + 5x.",
+        questionType: "mc",
+        questionPatternId: "pattern-a",
+        options: [
+          { id: "A", text: "8x" },
+          { id: "B", text: "5x" },
+        ],
+        correctAnswer: "A",
+        explanation: "3x and 5x are like terms.",
+        ...overrides,
+      },
+    ],
+  });
+}
+
+const VALID_RESPONSE_JSON = responseJson();
 
 function makeFakeProvider(): AiProvider & {
   generate: ReturnType<typeof vi.fn<(request: AiGenerateRequest) => Promise<AiGenerateResult>>>;
@@ -45,13 +51,14 @@ describe("generateQuestions", () => {
     const provider = makeFakeProvider();
     provider.generate.mockResolvedValue({ ok: true, rawText: VALID_RESPONSE_JSON });
 
-    const result = await generateQuestions(CONTEXT, ["multiple_choice"], provider);
+    const result = await generateQuestions(CONTEXT, ["mc"], provider);
 
     expect(provider.generate).toHaveBeenCalledTimes(1);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.data.questions).toHaveLength(1);
       expect(result.data.questions[0].questionText).toBe("Simplify 3x + 5x.");
+      expect(result.data.questions[0].questionPatternId).toBe("pattern-a");
     }
   });
 
@@ -59,7 +66,7 @@ describe("generateQuestions", () => {
     const provider = makeFakeProvider();
     provider.generate.mockResolvedValue({ ok: true, rawText: VALID_RESPONSE_JSON });
 
-    await generateQuestions(CONTEXT, ["multiple_choice"], provider);
+    await generateQuestions(CONTEXT, ["mc"], provider);
 
     const sentPrompt = provider.generate.mock.calls[0][0].prompt as string;
     expect(sentPrompt).toMatch(new RegExp(`Generate ${DEFAULT_QUESTION_COUNT} questions`));
@@ -69,7 +76,7 @@ describe("generateQuestions", () => {
     const provider = makeFakeProvider();
     const emptyContext: GenerationContext = { ...CONTEXT, patterns: [] };
 
-    const result = await generateQuestions(emptyContext, ["multiple_choice"], provider);
+    const result = await generateQuestions(emptyContext, ["mc"], provider);
 
     expect(provider.generate).not.toHaveBeenCalled();
     expect(result.ok).toBe(false);
@@ -80,7 +87,7 @@ describe("generateQuestions", () => {
     const provider = makeFakeProvider();
     provider.generate.mockResolvedValue({ ok: false, error: "Unable to reach the AI provider." });
 
-    const result = await generateQuestions(CONTEXT, ["multiple_choice"], provider);
+    const result = await generateQuestions(CONTEXT, ["mc"], provider);
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -93,15 +100,45 @@ describe("generateQuestions", () => {
     const provider = makeFakeProvider();
     provider.generate.mockResolvedValue({ ok: true, rawText: "not valid json at all" });
 
-    const result = await generateQuestions(CONTEXT, ["multiple_choice"], provider);
+    const result = await generateQuestions(CONTEXT, ["mc"], provider);
 
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.stage).toBe("validation");
   });
 
+  it("rejects a response whose questionPatternId is not one of the selected patterns", async () => {
+    const provider = makeFakeProvider();
+    provider.generate.mockResolvedValue({
+      ok: true,
+      rawText: responseJson({ questionPatternId: "some-other-id" }),
+    });
+
+    const result = await generateQuestions(CONTEXT, ["mc"], provider);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.stage).toBe("validation");
+      expect(result.error).toMatch(/pattern/i);
+    }
+  });
+
+  it("rejects a response whose questionType was not selected", async () => {
+    const provider = makeFakeProvider();
+    provider.generate.mockResolvedValue({
+      ok: true,
+      rawText: responseJson({ questionType: "wp", options: undefined, correctAnswer: "8x" }),
+    });
+
+    const result = await generateQuestions(CONTEXT, ["mc"], provider);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.stage).toBe("validation");
+      expect(result.error).toMatch(/type/i);
+    }
+  });
+
   it("only depends on the AiProvider interface, not any concrete provider implementation", async () => {
-    // This test file never imports HttpAiProvider — enforced by review/grep, asserted here
-    // structurally: the fake provider satisfies AiProvider with no network involved.
     const provider = makeFakeProvider();
     provider.generate.mockResolvedValue({ ok: true, rawText: VALID_RESPONSE_JSON });
 

@@ -791,13 +791,24 @@ That is not currently required.
 
 # 31. Generation Logging
 
-The initial project does not require permanent storage of every generated prompt or generated question.
+> **Implemented (TASK-016–019):** the persistence model described here as "can be
+> introduced later" now exists. The four tables (`generation_contexts`,
+> `generation_context_question_types`, `generation_context_question_patterns`,
+> `generated_questions`) are written by `lib/persistence/save-generation.ts` —
+> but only when the user explicitly clicks **Save for Evaluation** on the
+> Questions page (TASK-018). Generation itself writes nothing. See `database.md` §35.
 
-During development, normal application logging may be used to debug generation behavior.
+Console logging of the final prompt is still emitted during generation for
+debugging. The stored `generation_contexts.prompt` is the durable record used for
+comparing historical generations.
 
-If research later requires comparing historical generations, a persistence model can be introduced.
-
-Do not create a generation-history table prematurely.
+> **Read path added (TASK-020):** the Evaluate Results dialog's "Compare with
+> Previous Generations" option finds saved `generation_contexts` rows whose
+> difficulty + question-pattern-id set + question-type set exactly matches the
+> current selection (`findMatchingGenerationContexts`), lets the user pick one,
+> and evaluates it through the same `evaluateGeneration()` pipeline used for
+> live generations (`prepareSavedEvaluation` → `loadSavedGeneration`). See
+> `database.md` "Reading these tables (TASK-020)".
 
 ---
 
@@ -1187,14 +1198,15 @@ TASK-006 implemented the deterministic Prompt Builder and AI output contract des
 
 ```text
 lib/prompts/
-├── types.ts     — AiQuestionType, GeneratedQuestion, GenerationResponse, PromptRequest
-├── common.ts    — COMMON_INSTRUCTIONS, DIFFICULTY_GUIDANCE, QUESTION_TYPE_ID_MAP, OUTPUT_FORMAT_INSTRUCTIONS
-├── builder.ts   — buildPrompt(request: PromptRequest): string
-└── schema.ts    — parseGenerationResponse(raw: string): ParsedGenerationResponse
+├── types.ts                   — GeneratedQuestion, GenerationResponse, PromptRequest
+├── common.ts                  — COMMON_INSTRUCTIONS, DIFFICULTY_GUIDANCE, OUTPUT_FORMAT_INSTRUCTIONS
+├── builder.ts                 — buildPrompt(request: PromptRequest): string
+├── schema.ts                  — parseGenerationResponse(raw: string): ParsedGenerationResponse
+└── validate-classification.ts — validateClassification(response, { patternIds, typeCodes })
 ```
 
-`buildPrompt` takes an already-loaded `GenerationContext` (from `lib/db/generation-context.ts`, TASK-005) plus the requested question type(s) and count, and deterministically assembles 7 sections: Common Instructions, Generation Requirement (count), Educational Context (Subject/Subtopic/Question Patterns + per-pattern generation guidance), Difficulty (with the project-specific guidance text), Question Type (explicit list, or all available types when the user chose "let AI mix"), Reference Questions, and Output Format (the required JSON contract, verbatim).
+`buildPrompt` takes an already-loaded `GenerationContext` (from `lib/db/generation-context.ts`, TASK-005) plus the requested question type code(s) and count, and deterministically assembles 7 sections: Common Instructions, Generation Requirement (count), Educational Context (Subject/Subtopic + **SELECTED QUESTION PATTERNS**, each shown as `ID` + `Name` + optional `Details`), Difficulty, Question Type (**SELECTED QUESTION TYPES**, each `ID` + `Name`), Reference Questions, and Output Format (the required JSON contract, verbatim).
 
-The expected AI response is validated with a small `zod` schema (`lib/prompts/schema.ts`) — a `multiple_choice` question requires a non-empty `options` array and a `correctAnswer` matching one of the option ids; other question types only require `correctAnswer` as plain text. `parseGenerationResponse` never throws — malformed JSON or a schema violation both return `{ ok: false, error }`.
+**AI output contract (TASK-019).** Every question returns `questionType` as a stable code (`mc`/`fib`/`wp`/`tf`/`ms`) and `questionPatternId` as the exact database id copied from the SELECTED QUESTION PATTERNS section — never a pattern name. Two stages check it: `parseGenerationResponse` (`zod`) enforces shape — an `mc` question needs a non-empty `options` array and a `correctAnswer` matching an option id; `questionPatternId` is a required non-empty string — then `validateClassification` checks each question's type and pattern id are among the user's current selections. Either failure rejects the whole generation (`stage: "validation"`). Neither ever throws.
 
 **No AI provider is called by this module.** A dev-only inspection route, `app/dev/prompt-preview`, lets a researcher see the exact final prompt string that would be sent, built from live database context — satisfying the "prompt must be inspectable" research-loop requirement without wiring a live AI call.

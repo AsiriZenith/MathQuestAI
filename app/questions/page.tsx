@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, ClipboardCheck, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ClipboardCheck, RefreshCw, Save } from "lucide-react";
 import { motion } from "motion/react";
 import { DIFFICULTY_OPTIONS } from "@/lib/mock-data";
 import { usePracticeSession } from "@/components/providers/practice-session-provider";
@@ -10,15 +10,25 @@ import { SelectionSummary } from "@/components/common/selection-summary";
 import { QuestionCoverage } from "./_components/question-coverage";
 import { QuestionCard } from "./_components/question-card";
 import { EvaluationMethodDialog } from "./_components/evaluation-method-dialog";
-import type { EvaluationData } from "@/lib/types";
+import { SaveForEvaluationDialog } from "./_components/save-for-evaluation-dialog";
+import type { ComparisonData, EvaluationData } from "@/lib/types";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default function QuestionsPage() {
   const router = useRouter();
-  const { config, generationContext, generationResponse, generationMeta, setEvaluationData } =
-    usePracticeSession();
+  const {
+    config,
+    generationContext,
+    generationResponse,
+    generationMeta,
+    setEvaluationData,
+    savedGenerationContextId,
+    setSavedGenerationContextId,
+    setComparisonData,
+  } = usePracticeSession();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!config || !generationResponse) {
@@ -32,6 +42,19 @@ export default function QuestionsPage() {
     setEvaluationData(data);
     setDialogOpen(false);
     router.push("/evaluation");
+  };
+
+  const handleComparisonPrepared = (data: ComparisonData) => {
+    setComparisonData(data);
+    setDialogOpen(false);
+    router.push("/comparison");
+  };
+
+  const saved = savedGenerationContextId !== null;
+
+  const handleSaved = (generationContextId: string) => {
+    setSavedGenerationContextId(generationContextId);
+    setSaveDialogOpen(false);
   };
 
   const questions = generationResponse.questions;
@@ -96,8 +119,29 @@ export default function QuestionsPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.05 * questions.length }}
-        className="mt-8"
+        className="mt-8 space-y-3"
       >
+        {saved ? (
+          <div>
+            <div className="font-jakarta w-full flex items-center justify-center gap-2 bg-secondary/60 border border-border text-foreground font-semibold text-sm py-3 rounded-xl">
+              <Check className="w-4 h-4 text-primary" />
+              Saved for evaluation
+            </div>
+            <p className="text-center text-xs text-muted-foreground mt-2" role="status">
+              Questions saved successfully for evaluation.
+            </p>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setSaveDialogOpen(true)}
+            className="font-jakarta w-full flex items-center justify-center gap-2 bg-background border border-border text-foreground font-semibold text-sm py-3 rounded-xl shadow-sm hover:border-primary/40 hover:bg-secondary/60 transition-colors duration-150"
+          >
+            <Save className="w-4 h-4" />
+            Save for Evaluation
+          </button>
+        )}
+
         <button
           type="button"
           onClick={() => setDialogOpen(true)}
@@ -107,10 +151,20 @@ export default function QuestionsPage() {
           Evaluate Results
           <ArrowRight className="w-5 h-5" />
         </button>
-        <p className="text-center text-xs text-muted-foreground mt-3">
+        <p className="text-center text-xs text-muted-foreground">
           See how well these questions cover the benchmark set and requested difficulty.
         </p>
       </motion.div>
+
+      <SaveForEvaluationDialog
+        open={saveDialogOpen && !saved}
+        onClose={() => setSaveDialogOpen(false)}
+        config={config}
+        generationContext={generationContext}
+        generationResponse={generationResponse}
+        generationMeta={generationMeta}
+        onSaved={handleSaved}
+      />
 
       <EvaluationMethodDialog
         open={dialogOpen}
@@ -120,6 +174,8 @@ export default function QuestionsPage() {
         generationResponse={generationResponse}
         generationMeta={generationMeta}
         onPrepared={handleEvaluationPrepared}
+        onComparisonPrepared={handleComparisonPrepared}
+        savedGenerationContextId={savedGenerationContextId}
       />
     </main>
   );

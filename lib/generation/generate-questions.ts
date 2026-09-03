@@ -5,8 +5,9 @@ import { generationResponseSchema, parseGenerationResponse } from "@/lib/prompts
 import { DEFAULT_QUESTION_COUNT } from "@/lib/ai/config";
 import { HttpAiProvider } from "@/lib/ai/http-provider";
 import type { AiProvider } from "@/lib/ai/provider";
-import type { AiQuestionType, GenerationResponse } from "@/lib/prompts/types";
-import type { GenerationContext } from "@/lib/types";
+import { validateClassification } from "@/lib/prompts/validate-classification";
+import type { GenerationResponse } from "@/lib/prompts/types";
+import { QUESTION_TYPE_CODES, type GenerationContext, type QuestionType } from "@/lib/types";
 
 export type GenerateQuestionsResult =
   | { ok: true; data: GenerationResponse; prompt: string; requestedQuestionCount: number }
@@ -14,7 +15,7 @@ export type GenerateQuestionsResult =
 
 export async function generateQuestions(
   context: GenerationContext,
-  questionTypes: AiQuestionType[] | "auto",
+  questionTypes: QuestionType[] | "auto",
   provider: AiProvider = new HttpAiProvider(),
 ): Promise<GenerateQuestionsResult> {
   if (context.patterns.length === 0) {
@@ -52,6 +53,17 @@ export async function generateQuestions(
   if (!parsed.ok) {
     console.error("generateQuestions: validation stage failed");
     return { ok: false, stage: "validation", error: parsed.error };
+  }
+
+  // Every question must have classified itself with a question type and a
+  // question pattern id the user actually selected (TASK-019). No name matching.
+  const classification = validateClassification(parsed.data, {
+    patternIds: context.patterns.map((p) => p.id),
+    typeCodes: questionTypes === "auto" ? [...QUESTION_TYPE_CODES] : questionTypes,
+  });
+  if (!classification.ok) {
+    console.error("generateQuestions: validation stage failed - classification");
+    return { ok: false, stage: "validation", error: classification.error };
   }
 
   console.log("generateQuestions: generation succeeded");

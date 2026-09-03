@@ -1,5 +1,6 @@
-import { ALL_AI_QUESTION_TYPES, questionTypeLabel } from "@/lib/prompts/common";
-import type { AiQuestionType, GenerationResponse } from "@/lib/prompts/types";
+import { QUESTION_TYPE_OPTIONS } from "@/lib/mock-data";
+import { questionTypeLabel, type QuestionType } from "@/lib/types";
+import type { GenerationResponse } from "@/lib/prompts/types";
 import type { CoverageReport, Deviation, DimensionScore } from "@/lib/evaluation/types";
 
 export interface TypeAdherenceOutcome {
@@ -23,16 +24,16 @@ export interface TypeAdherenceOutcome {
  */
 export function evaluateTypeAdherence(
   response: GenerationResponse,
-  requestedTypes: AiQuestionType[] | "auto",
+  requestedTypes: QuestionType[] | "auto",
 ): TypeAdherenceOutcome {
   const questions = response.questions;
   const total = questions.length;
   const isAuto = requestedTypes === "auto";
-  const allowed: AiQuestionType[] = isAuto
-    ? ALL_AI_QUESTION_TYPES.map((t) => t.id)
+  const allowed: QuestionType[] = isAuto
+    ? QUESTION_TYPE_OPTIONS.map((t) => t.id)
     : requestedTypes;
 
-  const counts = new Map<AiQuestionType, number>();
+  const counts = new Map<QuestionType, number>();
   for (const question of questions) {
     counts.set(question.questionType, (counts.get(question.questionType) ?? 0) + 1);
   }
@@ -43,12 +44,12 @@ export function evaluateTypeAdherence(
   // In auto mode the prompt asks for "a varied mix", so variety itself is the
   // requirement. Anything less than a handful of distinct types under-delivers.
   const distinctCount = counts.size;
-  const varietyTarget = Math.min(ALL_AI_QUESTION_TYPES.length, Math.max(1, total));
+  const varietyTarget = Math.min(QUESTION_TYPE_OPTIONS.length, Math.max(1, total));
   const varietyRatio = varietyTarget > 0 ? Math.min(1, distinctCount / varietyTarget) : 1;
 
   const score = isAuto ? varietyRatio : inScopeRatio;
 
-  const entries = ALL_AI_QUESTION_TYPES.filter(
+  const entries = QUESTION_TYPE_OPTIONS.filter(
     (type) => allowed.includes(type.id) || (counts.get(type.id) ?? 0) > 0,
   ).map((type) => {
     const count = counts.get(type.id) ?? 0;

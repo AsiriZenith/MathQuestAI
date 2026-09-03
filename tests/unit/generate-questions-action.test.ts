@@ -30,13 +30,13 @@ describe("generateQuestionsAction", () => {
   it("calls generateQuestions with the given context and question types", async () => {
     generateQuestionsMock.mockResolvedValue({ ok: true, data: { questions: [] } });
 
-    await generateQuestionsAction(CONTEXT, ["multiple_choice"]);
+    await generateQuestionsAction(CONTEXT, ["mc"]);
 
-    expect(generateQuestionsMock).toHaveBeenCalledWith(CONTEXT, ["multiple_choice"]);
+    expect(generateQuestionsMock).toHaveBeenCalledWith(CONTEXT, ["mc"]);
   });
 
   it("does not call generateQuestions when context is null, and returns a safe error", async () => {
-    const result = await generateQuestionsAction(null, ["multiple_choice"]);
+    const result = await generateQuestionsAction(null, ["mc"]);
 
     expect(generateQuestionsMock).not.toHaveBeenCalled();
     expect(result.ok).toBe(false);
@@ -58,7 +58,7 @@ describe("generateQuestionsAction", () => {
       error: "Unable to reach the Gemini API.",
     });
 
-    const result = await generateQuestionsAction(CONTEXT, ["multiple_choice"]);
+    const result = await generateQuestionsAction(CONTEXT, ["mc"]);
 
     expect(result).toEqual({
       ok: false,

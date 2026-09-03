@@ -44,7 +44,7 @@ export function evaluateOutputIntegrity(response: GenerationResponse): Dimension
       : `Numbering is not a clean 1..${numbers.length} sequence: [${numbers.join(", ")}].`,
   });
 
-  const mcQuestions = questions.filter((q) => q.questionType === "multiple_choice");
+  const mcQuestions = questions.filter((q) => q.questionType === "mc");
 
   const mcWithDuplicateIds = mcQuestions.filter(
     (q) => new Set(q.options?.map((o) => o.id)).size !== (q.options?.length ?? 0),
@@ -89,7 +89,7 @@ export function evaluateOutputIntegrity(response: GenerationResponse): Dimension
   });
 
   const strayOptions = questions.filter(
-    (q) => q.questionType !== "multiple_choice" && (q.options?.length ?? 0) > 0,
+    (q) => q.questionType !== "mc" && (q.options?.length ?? 0) > 0,
   );
   checks.push({
     id: "no_stray_options",

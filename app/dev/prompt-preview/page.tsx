@@ -1,19 +1,12 @@
 import { getQuestionPatternsForSubtopic, getSubjectWithSubtopics } from "@/lib/db/education";
 import { getGenerationContext } from "@/lib/db/generation-context";
 import { buildPrompt } from "@/lib/prompts/builder";
-import type { AiQuestionType } from "@/lib/prompts/types";
-import type { Difficulty } from "@/lib/types";
+import { QUESTION_TYPE_CODES, type Difficulty, type QuestionType } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 const VALID_DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
-const VALID_QUESTION_TYPES: AiQuestionType[] = [
-  "multiple_choice",
-  "fill_in_the_blank",
-  "word_problem",
-  "true_false",
-  "multi_step",
-];
+const VALID_QUESTION_TYPES: QuestionType[] = [...QUESTION_TYPE_CODES];
 
 export default async function PromptPreviewPage({
   searchParams,
@@ -27,12 +20,10 @@ export default async function PromptPreviewPage({
     : "medium";
 
   const rawQuestionType =
-    typeof params.questionType === "string" ? params.questionType : "multiple_choice";
-  const questionType: AiQuestionType = VALID_QUESTION_TYPES.includes(
-    rawQuestionType as AiQuestionType,
-  )
-    ? (rawQuestionType as AiQuestionType)
-    : "multiple_choice";
+    typeof params.questionType === "string" ? params.questionType : "mc";
+  const questionType: QuestionType = VALID_QUESTION_TYPES.includes(rawQuestionType as QuestionType)
+    ? (rawQuestionType as QuestionType)
+    : "mc";
 
   const count = Number(params.count) > 0 ? Number(params.count) : 5;
 

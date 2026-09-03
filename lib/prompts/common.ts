@@ -1,5 +1,4 @@
 import type { Difficulty } from "@/lib/types";
-import type { AiQuestionType } from "@/lib/prompts/types";
 
 export const COMMON_INSTRUCTIONS = `You are generating mathematics practice questions for a research prototype.
 Generate exactly the requested number of questions.
@@ -14,21 +13,6 @@ export const DIFFICULTY_GUIDANCE: Record<Difficulty, string> = {
   hard: "Requires multiple connected steps, a more complex arrangement, or a combination of a few related complexity factors.",
 };
 
-export const QUESTION_TYPE_ID_MAP: Record<string, { id: AiQuestionType; label: string }> = {
-  mc: { id: "multiple_choice", label: "Multiple Choice" },
-  fib: { id: "fill_in_the_blank", label: "Fill in the Blank" },
-  wp: { id: "word_problem", label: "Word Problem" },
-  tf: { id: "true_false", label: "True / False" },
-  ms: { id: "multi_step", label: "Multi-step Problem" },
-};
-
-export const ALL_AI_QUESTION_TYPES: { id: AiQuestionType; label: string }[] =
-  Object.values(QUESTION_TYPE_ID_MAP);
-
-export function questionTypeLabel(id: AiQuestionType): string {
-  return ALL_AI_QUESTION_TYPES.find((t) => t.id === id)?.label ?? id;
-}
-
 export const OUTPUT_FORMAT_INSTRUCTIONS = `Return ONLY valid JSON using this exact structure. Do not wrap it in Markdown code fences. Do not add any text before or after the JSON.
 
 {
@@ -36,8 +20,8 @@ export const OUTPUT_FORMAT_INSTRUCTIONS = `Return ONLY valid JSON using this exa
     {
       "questionNumber": 1,
       "questionText": "...",
-      "questionType": "multiple_choice",
-      "questionPattern": "...",
+      "questionType": "mc",
+      "questionPatternId": "<the exact id of a pattern from the SELECTED QUESTION PATTERNS section>",
       "options": [
         { "id": "A", "text": "..." },
         { "id": "B", "text": "..." },
@@ -50,6 +34,8 @@ export const OUTPUT_FORMAT_INSTRUCTIONS = `Return ONLY valid JSON using this exa
   ]
 }
 
-The "options" field is required only when "questionType" is "multiple_choice". For other question types, omit "options" and provide "correctAnswer" as the expected answer text.
+The "questionType" field is required for every question. It must be exactly one of the question-type codes listed in the QUESTION TYPE section (for example "mc"). Never invent a code and never use a code that was not listed.
 
-The "questionPattern" field is required for every question. Set it to the exact name of the Question Pattern from the EDUCATIONAL CONTEXT section that the question implements. Copy the name exactly as written there.`;
+The "options" field is required only when "questionType" is "mc". For other question types, omit "options" and provide "correctAnswer" as the expected answer text.
+
+For every generated question, return the "questionPatternId" of the selected Question Pattern that the question implements. Use the exact ID supplied in the SELECTED QUESTION PATTERNS section. Never invent, modify, or generate a new ID. Do not return the Question Pattern name instead of the ID.`;
