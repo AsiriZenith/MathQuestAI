@@ -20,13 +20,13 @@ interface PracticeSessionState {
   generationMeta: GenerationMeta | null;
   setGenerationMeta: (meta: GenerationMeta) => void;
   evaluationData: EvaluationData | null;
-  setEvaluationData: (data: EvaluationData) => void;
+  setEvaluationData: (data: EvaluationData | null) => void;
   /** Set once the current generation has been persisted (TASK-018). */
   savedGenerationContextId: string | null;
   setSavedGenerationContextId: (id: string | null) => void;
   /** Current-vs-previous comparison, prepared by the Questions page (TASK-023). */
   comparisonData: ComparisonData | null;
-  setComparisonData: (data: ComparisonData) => void;
+  setComparisonData: (data: ComparisonData | null) => void;
 }
 
 const PracticeSessionContext = createContext<PracticeSessionState | null>(null);

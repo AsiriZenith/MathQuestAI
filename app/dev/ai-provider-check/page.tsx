@@ -1,7 +1,7 @@
 import { buildPrompt } from "@/lib/prompts/builder";
 import { generationResponseSchema, parseGenerationResponse } from "@/lib/prompts/schema";
 import { HttpAiProvider } from "@/lib/ai/http-provider";
-import { getAiBaseUrl, getAiModel } from "@/lib/ai/config";
+import { getAiBaseUrl, getAiModel, getAiProvider } from "@/lib/ai/config";
 import { z } from "zod";
 import type { GenerationContext } from "@/lib/types";
 
@@ -34,11 +34,13 @@ export default async function AiProviderCheckPage() {
 
   const model = getAiModel();
   const baseUrl = getAiBaseUrl();
+  const providerLabel = getAiProvider();
 
   if (!result.ok) {
     return (
       <main className="p-8 font-mono text-sm space-y-4">
         <h1 className="text-lg font-bold">AI Provider Connectivity Check</h1>
+        <p>Provider: {providerLabel}</p>
         <p>Base URL: {baseUrl}</p>
         <p>Model: {model}</p>
         <p>Connected: NO</p>
@@ -52,6 +54,7 @@ export default async function AiProviderCheckPage() {
   return (
     <main className="p-8 font-mono text-sm space-y-6">
       <h1 className="text-lg font-bold">AI Provider Connectivity Check</h1>
+      <p>Provider: {providerLabel}</p>
       <p>Base URL: {baseUrl}</p>
       <p>Model: {model}</p>
       <p>Connected: YES</p>

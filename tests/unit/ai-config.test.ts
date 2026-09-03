@@ -9,10 +9,10 @@ afterEach(() => {
 });
 
 describe("getAiProvider", () => {
-  it("defaults to 'groq'", () => {
+  it("defaults to 'deepseek'", () => {
     delete process.env.AI_PROVIDER;
-    expect(getAiProvider()).toBe("groq");
-    expect(DEFAULT_AI_PROVIDER).toBe("groq");
+    expect(getAiProvider()).toBe("deepseek");
+    expect(DEFAULT_AI_PROVIDER).toBe("deepseek");
   });
 
   it("uses the AI_PROVIDER env var when set", () => {
@@ -22,6 +22,6 @@ describe("getAiProvider", () => {
 
   it("ignores an empty AI_PROVIDER value", () => {
     process.env.AI_PROVIDER = "";
-    expect(getAiProvider()).toBe("groq");
+    expect(getAiProvider()).toBe("deepseek");
   });
 });

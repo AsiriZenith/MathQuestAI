@@ -189,8 +189,8 @@ describe("EvaluationMethodDialog", () => {
         id: "ctx-1",
         name: "Generation-1",
         difficultyLevel: "Easy",
-        aiProvider: "groq",
-        aiModel: "openai/gpt-oss-120b",
+        aiProvider: "deepseek",
+        aiModel: "deepseek-chat",
         patterns: [{ id: "pattern-a", name: "Combine Like Terms" }],
         questionTypes: ["mc"],
       },
@@ -198,8 +198,8 @@ describe("EvaluationMethodDialog", () => {
         id: "ctx-2",
         name: "Generation-2",
         difficultyLevel: "Easy",
-        aiProvider: "groq",
-        aiModel: "openai/gpt-oss-120b",
+        aiProvider: "deepseek",
+        aiModel: "deepseek-chat",
         patterns: [{ id: "pattern-a", name: "Combine Like Terms" }],
         questionTypes: ["mc"],
       },
@@ -314,6 +314,22 @@ describe("EvaluationMethodDialog", () => {
         config: CONFIG,
         generationContext: CONTEXT,
         excludeGenerationContextId: "ctx-current",
+      });
+    });
+
+    it("excludes nothing when the current generation is unsaved (TASK-024)", async () => {
+      findMatchingGenerationContextsAction.mockResolvedValue({ ok: true, contexts: [] });
+      const user = userEvent.setup();
+      renderDialog(vi.fn(), vi.fn(), null);
+
+      await user.click(
+        screen.getByRole("button", { name: /compare with previous generations/i }),
+      );
+
+      expect(findMatchingGenerationContextsAction).toHaveBeenCalledWith({
+        config: CONFIG,
+        generationContext: CONTEXT,
+        excludeGenerationContextId: null,
       });
     });
   });

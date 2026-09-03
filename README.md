@@ -787,11 +787,11 @@ The exact variable names, their defaults, and a filled-in example are documented
 
 ## 25. Local AI Configuration
 
-MathQuestAI talks to any **OpenAI-compatible** AI provider (Groq, Gemini's OpenAI-compatible endpoint, OpenAI itself, or any other provider exposing the same `chat/completions` API shape). Switching providers is a `.env.local` change only — no source file edits are needed.
+MathQuestAI talks to any **OpenAI-compatible** AI provider (DeepSeek, Groq, Gemini's OpenAI-compatible endpoint, OpenAI itself, or any other provider exposing the same `chat/completions` API shape). Switching providers is a `.env.local` change only — no source file edits are needed.
 
 ### 1. Get an API key
 
-Today's setup uses [Groq](https://console.groq.com/) — create an API key there. Any other OpenAI-compatible provider's key works the same way, just with a different `AI_BASE_URL`/`AI_MODEL`.
+Today's setup uses [DeepSeek](https://platform.deepseek.com/) — create an API key there. Any other OpenAI-compatible provider's key works the same way, just with a different `AI_BASE_URL`/`AI_MODEL`.
 
 ### 2. Configure the local environment
 
@@ -799,11 +799,12 @@ Create `.env.local` in the project root and add:
 
 ```env
 AI_API_KEY=your-api-key-here
-AI_MODEL=openai/gpt-oss-120b
-AI_BASE_URL=https://api.groq.com/openai/v1
+AI_MODEL=deepseek-chat
+AI_BASE_URL=https://api.deepseek.com
+AI_PROVIDER=deepseek
 ```
 
-`AI_MODEL` and `AI_BASE_URL` are optional — they default to Groq's model/endpoint if omitted. Set them explicitly to point at a different OpenAI-compatible provider.
+`AI_MODEL`, `AI_BASE_URL` and `AI_PROVIDER` are optional — they default to DeepSeek's model/endpoint/label if omitted. Set them explicitly to point at a different OpenAI-compatible provider.
 
 Never commit `.env.local` or expose the API key publicly.
 

@@ -39,8 +39,8 @@ function input(overrides: Partial<MapGenerationInput> = {}): MapGenerationInput 
     aiResponse: { questions: [question()] },
     prompt: "FINAL PROMPT",
     createdAt: CREATED_AT,
-    aiProvider: "groq",
-    aiModel: "openai/gpt-oss-120b",
+    aiProvider: "deepseek",
+    aiModel: "deepseek-chat",
     requestedQuestionCount: 10,
     ...overrides,
   };
@@ -55,8 +55,8 @@ describe("mapGeneration", () => {
     expect(result.value.context).toMatchObject({
       name: "Generation-2026-08-29-04-30-15-123",
       difficultyLevel: "Medium",
-      aiProvider: "groq",
-      aiModel: "openai/gpt-oss-120b",
+      aiProvider: "deepseek",
+      aiModel: "deepseek-chat",
       prompt: "FINAL PROMPT",
       createdAt: CREATED_AT,
       requestedQuestionCount: 10,

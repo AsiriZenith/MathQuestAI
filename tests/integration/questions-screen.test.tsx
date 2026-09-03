@@ -113,8 +113,8 @@ describe("Questions screen", () => {
       id: "ctx-1",
       name: "Generation-2026-01-01-00-00-00-000",
       difficultyLevel: "Easy",
-      aiProvider: "groq",
-      aiModel: "openai/gpt-oss-120b",
+      aiProvider: "deepseek",
+      aiModel: "deepseek-chat",
       patterns: [
         { id: "pattern-a", name: "Combine Like Terms" },
         { id: "pattern-b", name: "Solve Linear Equations" },
@@ -144,8 +144,8 @@ describe("Questions screen", () => {
         screen.getByText("Combine Like Terms, Solve Linear Equations"),
       ).toBeInTheDocument();
       expect(screen.getByText("Multiple Choice, Fill in the Blank")).toBeInTheDocument();
-      expect(screen.getByText("groq")).toBeInTheDocument();
-      expect(screen.getByText("openai/gpt-oss-120b")).toBeInTheDocument();
+      expect(screen.getByText("deepseek")).toBeInTheDocument();
+      expect(screen.getByText("deepseek-chat")).toBeInTheDocument();
       expect(screen.getByRole("cell", { name: "Easy" })).toBeInTheDocument();
     });
 
@@ -290,6 +290,23 @@ describe("Questions screen", () => {
       expect(
         screen.queryByRole("button", { name: /save for evaluation/i }),
       ).not.toBeInTheDocument();
+    });
+
+    it("offers to save a freshly generated set even when its configuration matches an earlier saved run (TASK-024)", () => {
+      // A new generation resets savedGenerationContextId to null, so identical
+      // criteria to an earlier saved generation must not suppress the button.
+      renderWithSession(<QuestionsPage />, {
+        config: TEST_CONFIG,
+        generationContext: TEST_GENERATION_CONTEXT,
+        generationMeta: TEST_GENERATION_META,
+        generationResponse: TEST_GENERATION_RESPONSE,
+        savedGenerationContextId: null,
+      });
+
+      expect(
+        screen.getByRole("button", { name: /save for evaluation/i }),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
     });
 
     it("does not offer to save again once already saved", () => {

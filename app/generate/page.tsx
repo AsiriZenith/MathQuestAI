@@ -27,8 +27,15 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default function GeneratePage() {
   const router = useRouter();
-  const { config, generationContext, setGenerationResponse, setGenerationMeta } =
-    usePracticeSession();
+  const {
+    config,
+    generationContext,
+    setGenerationResponse,
+    setGenerationMeta,
+    setSavedGenerationContextId,
+    setEvaluationData,
+    setComparisonData,
+  } = usePracticeSession();
   const [currentStep, setCurrentStep] = useState(1);
   const animationDone = currentStep > 4;
 
@@ -112,6 +119,13 @@ export default function GeneratePage() {
       prompt: result.prompt,
       requestedQuestionCount: result.requestedQuestionCount,
     });
+    // A new successful generation is a new generation instance (TASK-024): the
+    // previous run's saved id and derived evaluation/comparison results must not
+    // carry over, otherwise Gen #2 looks already-saved and its comparison
+    // excludes the wrong GenerationContext.
+    setSavedGenerationContextId(null);
+    setEvaluationData(null);
+    setComparisonData(null);
     router.push("/questions");
   };
 

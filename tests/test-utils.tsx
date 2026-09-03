@@ -1,6 +1,8 @@
 import { render, type RenderOptions } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { PracticeSessionProvider } from "@/components/providers/practice-session-provider";
+import { evaluateGeneration } from "@/lib/evaluation/evaluate-generation";
+import { compareEvaluationResults } from "@/lib/evaluation/compare-evaluations";
 import type { GenerationResponse } from "@/lib/prompts/types";
 import type {
   ComparisonData,
@@ -97,4 +99,31 @@ export const TEST_PROMPT = [
 export const TEST_GENERATION_META: GenerationMeta = {
   prompt: TEST_PROMPT,
   requestedQuestionCount: 10,
+};
+
+const TEST_EVALUATION_RESULT = evaluateGeneration({
+  config: TEST_CONFIG,
+  generationContext: TEST_GENERATION_CONTEXT,
+  generationResponse: TEST_GENERATION_RESPONSE,
+  prompt: TEST_PROMPT,
+  requestedQuestionCount: 10,
+});
+
+/** A fully-populated evaluation result for seeding session state in tests. */
+export const TEST_EVALUATION_DATA: EvaluationData = {
+  method: "predefined",
+  config: TEST_CONFIG,
+  generationContext: TEST_GENERATION_CONTEXT,
+  generationResponse: TEST_GENERATION_RESPONSE,
+  prompt: TEST_PROMPT,
+  requestedQuestionCount: 10,
+  result: TEST_EVALUATION_RESULT,
+  generationContextId: null,
+};
+
+/** A current-vs-previous comparison for seeding session state in tests. */
+export const TEST_COMPARISON_DATA: ComparisonData = {
+  current: TEST_EVALUATION_DATA,
+  previous: TEST_EVALUATION_DATA,
+  comparison: compareEvaluationResults(TEST_EVALUATION_RESULT, TEST_EVALUATION_RESULT),
 };

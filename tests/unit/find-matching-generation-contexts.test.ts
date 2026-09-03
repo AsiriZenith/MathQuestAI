@@ -15,8 +15,8 @@ function row(overrides: Partial<Record<string, unknown>> = {}) {
     id: "ctx-1",
     name: "Generation-2026-01-01-00-00-00-000",
     difficultyLevel: "Medium",
-    aiProvider: "groq",
-    aiModel: "openai/gpt-oss-120b",
+    aiProvider: "deepseek",
+    aiModel: "deepseek-chat",
     questionTypes: [{ questionType: "mc" }, { questionType: "fib" }],
     questionPatterns: [
       { questionPatternId: "pattern-a", questionPattern: { id: "pattern-a", name: "A" } },
@@ -61,8 +61,8 @@ describe("findMatchingGenerationContexts", () => {
       id: "ctx-1",
       name: "Generation-2026-01-01-00-00-00-000",
       difficultyLevel: "Medium",
-      aiProvider: "groq",
-      aiModel: "openai/gpt-oss-120b",
+      aiProvider: "deepseek",
+      aiModel: "deepseek-chat",
       patterns: [
         { id: "pattern-a", name: "A" },
         { id: "pattern-b", name: "B" },
