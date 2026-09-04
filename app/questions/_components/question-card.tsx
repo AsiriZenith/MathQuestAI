@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
 import { QUESTION_TYPE_META } from "@/components/common/question-type-meta";
@@ -54,13 +55,13 @@ export function QuestionCard({
       )}
 
       <div className="mt-5 flex justify-end">
-        <button
-          type="button"
+        <Link
+          href={`/questions/practice/${question.questionNumber}`}
           className="font-jakarta group flex items-center gap-2 text-sm font-semibold text-primary hover:text-accent transition-colors duration-150"
         >
           Try Question
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
-        </button>
+        </Link>
       </div>
     </motion.div>
   );

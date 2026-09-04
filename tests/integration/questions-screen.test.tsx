@@ -57,6 +57,19 @@ describe("Questions screen", () => {
     expect(screen.getByText("1 different question types")).toBeInTheDocument();
   });
 
+  it("links each card's Try Question action to that question's focused practice page", () => {
+    renderQuestionsPage();
+
+    const links = screen.getAllByRole("link", { name: /try question/i });
+    expect(links).toHaveLength(TEST_GENERATION_RESPONSE.questions.length);
+    TEST_GENERATION_RESPONSE.questions.forEach((q, i) => {
+      expect(links[i]).toHaveAttribute(
+        "href",
+        `/questions/practice/${q.questionNumber}`,
+      );
+    });
+  });
+
   it("opens the evaluation-method dialog instead of navigating directly when Evaluate Results is clicked", async () => {
     const user = userEvent.setup();
     renderQuestionsPage();
