@@ -337,6 +337,13 @@ Question Page
 
 The UI should not need to parse raw AI-generated text.
 
+Each generated question also has a **Try Question** action (TASK-026) that opens a
+dedicated focused practice screen (`/questions/practice/[questionNumber]`): the user
+picks a practice duration, starts a countdown, attempts the question, and then
+manually reveals the correct answer and explanation. It is a lightweight
+self-practice aid only — no answer submission, grading, scoring, evaluation, or
+persistence, and it is entirely client-side UI state.
+
 ---
 
 ## 11. Evaluation
